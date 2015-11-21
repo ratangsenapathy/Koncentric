@@ -108,7 +108,7 @@ bool GameScene::init()
           
         }
    
-
+            CCLOG("Index=%d",index);
        CCDrawNode* polygon = CCDrawNode::create();
 
 	polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
@@ -142,7 +142,7 @@ void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event){
   auto rotateBy = RotateBy::create(0.25f,0);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 
-           CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
+          // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
        snake[0]->runAction(CCSequence::create(MoveTo::create(0.5,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),
        CCCallFunc::create(this,callfunc_selector(GameScene::actionComplete)),NULL));
 
@@ -160,21 +160,29 @@ controlable=1;
 }
 
 void GameScene::update(float dt){
- 
+ Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+//CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
   for(int i=0;i<levels[levelNo].count;i++)
-   {
-         if(levels[levelNo].blocks[i].ring*15==distance || levels[levelNo].blocks[i].ring*15==distance+15)
+   {              // CCLOG("Distance=%f",distance);
+         if(levels[levelNo].blocks[i].ring*15==distance || levels[levelNo].blocks[i].ring*15+15==distance)
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 
  		Size visibleSize = Director::getInstance()->getVisibleSize();
                 Vec2 origin = Director::getInstance()->getVisibleOrigin();
+                int originX=visibleSize.width/2+origin.x;
+                int originY=visibleSize.height/2+origin.y;
+                int snakeX=snakePosition.x;
+                int snakeY=snakePosition.y;
                  float curTheta = acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance);
-                      CCLOG("Distance=%f, Theta=%f",distance,curTheta*180/M_PI);
-                      float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
-		      float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
-		      CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
+
+                  if(snakeY<originY)
+                           curTheta=2*M_PI-curTheta;
+                    //  CCLOG("Distance=%f, Theta=%f",distance,curTheta*180/M_PI);
+                     // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
+		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
+		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
 		 if(curTheta>=levels[levelNo].blocks[i].theta1 && curTheta<=levels[levelNo].blocks[i].theta2)
                  {
                              controlable=0;
@@ -183,7 +191,7 @@ if(controlable==1){
   auto rotateBy = RotateBy::create(0.25f,0);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 
-         //  CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
+           //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
        snake[0]->runAction(CCSequence::create(MoveTo::create(0.5,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),
        CCCallFunc::create(this,callfunc_selector(GameScene::actionComplete)),NULL));
                            break;
