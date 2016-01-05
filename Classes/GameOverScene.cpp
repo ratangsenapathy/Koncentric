@@ -1,5 +1,5 @@
 #include "GameOverScene.h"
-
+#include "MainMenuScene.h"
 
 USING_NS_CC;
 
@@ -30,8 +30,28 @@ bool GameOverScene::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
+    auto label = Label::createWithTTF("Game Over","fonts/Marker Felt.ttf",45);
+    label->setPosition(Point(visibleSize.width/2,visibleSize.height*3/4));
     
+    label->setColor(cocos2d::Color3B::RED);
+    auto goToMainMenu = MenuItemFont::create("Go to Main Menu",CC_CALLBACK_1(GameOverScene::GoToMainMenu,this));
+    this->addChild(label);
+    
+    goToMainMenu->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+    
+    auto *menu = Menu::create(goToMainMenu,NULL);
+    menu->setPosition(Point(0,0));
+   
+    this->addChild(menu);
+
     
     
     return true;
+}
+
+
+void GameOverScene::GoToMainMenu(cocos2d::Ref *pSender)
+{
+    auto scene = MainMenuScene::createScene();
+    Director::getInstance()->replaceScene(scene);
 }

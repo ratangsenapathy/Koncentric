@@ -9,7 +9,7 @@ class GameScene : public cocos2d::Layer
 public:
     static cocos2d::Scene* createScene(int level);
     virtual bool init();
-    
+    cocos2d::Size visibleSize;
     cocos2d::DrawNode* goal;
     cocos2d::DrawNode* pathNode;
     cocos2d::DrawNode* snake[SNAKE_LENGTH];
@@ -17,6 +17,8 @@ public:
     cocos2d::Node* fixedPoint;
     cocos2d::DrawNode* blocks;
     float distance;
+    int exitButtonWidth;
+    int exitButtonHeight;
 //    cocos2d::Size visibleSize;
 //    cocos2d::Vec2 origin;
     // a selector callback
@@ -25,10 +27,13 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(GameScene);
     bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event* event);
-    void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event* event);
+ 
     void update(float dt);
     void drawComets();
     void actionComplete();
+    
+    
+    
 };
 
 #endif // __HELLOWORLD_SCENE_H__

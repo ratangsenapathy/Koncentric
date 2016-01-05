@@ -15,8 +15,10 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(GameOverScene);
-
     
+    void GoToMainMenu(Ref *pSender);
+
+   
 };
 
 #endif // __GAME_OVER_SCENE_H__

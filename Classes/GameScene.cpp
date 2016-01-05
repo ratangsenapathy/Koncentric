@@ -11,19 +11,22 @@ USING_NS_CC;
 float theta=0;
 int r=0;
 int levelNo=0;
-int controlable=1;
+int controlable=0;
 Scene* GameScene::createScene(int level)
 {
     // 'scene' is an autorelease object
     auto scene = Scene::create();
-
+    controlable=0;
+    r=0;
+    theta=0;
     // 'layer' is an autorelease object
+    levelNo=level;
     auto layer = GameScene::create();
 
     // add layer as a child to scene
     scene->addChild(layer);
     
-    levelNo=level;
+    
     // return the scene
     return scene;
 }
@@ -37,9 +40,10 @@ bool GameScene::init()
     if ( !Layer::init() )
     {
         return false;
-    } 
+    }
+    controlable=0;
     distance=90;
-    Size visibleSize = Director::getInstance()->getVisibleSize();
+    visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
    
     goal = DrawNode::create();
@@ -51,8 +55,11 @@ bool GameScene::init()
     rotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
     this->addChild(rotationPoint, 2);
     
-    
-  
+    auto label = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",10);
+    label->setPosition(Point(visibleSize.width-label->getContentSize().width,visibleSize.height));
+    this->addChild(label);
+    exitButtonWidth=label->getContentSize().width;
+    exitButtonHeight=label->getContentSize().height;
 
     fixedPoint = Node::create();
     fixedPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
@@ -62,8 +69,7 @@ bool GameScene::init()
     listener->setSwallowTouches(true);
     
     listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
-    listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded,this);
-
+    
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
        
     float theta=0;
@@ -114,19 +120,19 @@ bool GameScene::init()
           
         }
    
-            CCLOG("Index=%d",index);
+           
        CCDrawNode* polygon = CCDrawNode::create();
 
 	polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
 	fixedPoint->addChild(polygon);
 	}
         
-    snake[0]->runAction(Sequence::create(MoveTo::create(2,Vec2(snake[0]->getPosition().x+90,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+90,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
 
- //   distance=90;
+    distance=90;
    // auto rotateBy = RotateBy::create(0.25f,360/distance);
    // rotationPoint->runAction(RepeatForever::create(rotateBy));
-    
+    controlable=0;
     this->scheduleUpdate();
     return true;
 }
@@ -134,27 +140,26 @@ bool GameScene::init()
 
 bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
-    return true;
-}
-
-void GameScene::onTouchEnded(cocos2d::Touch *touch,cocos2d::Event* event){
-    
-          //rotationPoint->removeChild(snake[0]);
-         // snake[0]->drawDot(Vec2(90*cos(theta),90*sin(theta)),3,Color4F(100,0,0,1));
-         // fixedPoint->addChild(snake[0]);
-         //r-=15; 
-	controlable=0;
-	distance-=15;
-  auto rotateBy = RotateBy::create(0.25f,0);
-    rotationPoint->runAction(RepeatForever::create(rotateBy));
-
-          // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-       snake[0]->runAction(Sequence::create(MoveTo::create(0.5,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),
-       CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
-
-    
+    if((touch->getLocation().x>=(visibleSize.width-2*exitButtonWidth)) && (touch->getLocation().y>=(visibleSize.height-1.5*exitButtonHeight)))
+    {
+        auto scene = MainMenuScene::createScene();
+        Director::getInstance()->replaceScene(TransitionFade::create(2, scene));
+        return true;
+    }
+    if(controlable==1)
+    {
+        controlable=0;
+        distance-=15;
+        auto rotateBy = RotateBy::create(0.25f,0);
+        rotationPoint->runAction(RepeatForever::create(rotateBy));
         
-    
+        // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
+        snake[0]->runAction(Sequence::create(MoveTo::create(0.5,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),
+                                             CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        
+        
+    }
+    return true;
 }
 
 
@@ -162,10 +167,11 @@ void GameScene::actionComplete()
 {
     if(distance==0)
     {   if(levelNo+1==LEVEL_COUNT)
-    {
+    {   _eventDispatcher->removeAllEventListeners();
         auto scene = GameOverScene::createScene();
         Director::getInstance()->replaceScene(scene);
     }else{
+        _eventDispatcher->removeAllEventListeners();
         auto scene = GameScene::createScene(++levelNo);
         Director::getInstance()->replaceScene(scene);}
     }
@@ -176,7 +182,7 @@ controlable=1;
 
 void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
-CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
+//CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
   for(int i=0;i<levels[levelNo].count;i++)
    {              // CCLOG("Distance=%f",distance);
@@ -186,9 +192,7 @@ if(controlable==1){
 
  		Size visibleSize = Director::getInstance()->getVisibleSize();
                 Vec2 origin = Director::getInstance()->getVisibleOrigin();
-                int originX=visibleSize.width/2+origin.x;
                 int originY=visibleSize.height/2+origin.y;
-                int snakeX=snakePosition.x;
                 int snakeY=snakePosition.y;
                  float curTheta = acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance);
 
