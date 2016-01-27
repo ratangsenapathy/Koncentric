@@ -40,8 +40,8 @@ bool GameOverScene::init()
     goToMainMenu->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
     
     auto *menu = Menu::create(goToMainMenu,NULL);
-    menu->setPosition(Point(0,0));
-   
+    menu->setPosition(Point::ZERO);
+    
     this->addChild(menu);
 
     

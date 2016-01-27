@@ -1,5 +1,5 @@
 #include "MainMenuScene.h"
-#include "GameScene.h"
+#include "LevelSelectScene.h"
 #include "Definitions.h"
 
 USING_NS_CC;
@@ -42,7 +42,7 @@ bool MainMenuScene::init()
 }
 
 void MainMenuScene::goToGameScene(cocos2d::Ref *sender){
-    auto scene = GameScene::createScene(0);
+    auto scene = LevelSelectScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
 
 }

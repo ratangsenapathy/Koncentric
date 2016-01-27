@@ -5,4 +5,5 @@
 #define TRANSITION_TIME 0.5
 #define INIT_SPACESHIP_ORBIT 100
 #define SNAKE_LENGTH 1
+#define LEVEL_COUNT 6
 #endif // __DEFINITIONS_H__

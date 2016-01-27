@@ -1,6 +1,7 @@
 #ifndef __GAME_SCENE_H__
 #define __GAME_SCENE_H__
 #include "Definitions.h"
+
 #include "cocos2d.h"
 //#include "CCVector.h"
 
@@ -29,7 +30,6 @@ public:
     bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event* event);
  
     void update(float dt);
-    void drawComets();
     void actionComplete();
     
     

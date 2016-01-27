@@ -1,9 +1,7 @@
 #include "GameScene.h"
-
 #include "MainMenuScene.h"
-#include "Levels.h"
 #include "GameOverScene.h"
-
+#include "Levels.h"
 #define COCOS2D_DEBUG 1
 
 USING_NS_CC;
@@ -12,6 +10,7 @@ float theta=0;
 int r=0;
 int levelNo=0;
 int controlable=0;
+int rMax=0;
 Scene* GameScene::createScene(int level)
 {
     // 'scene' is an autorelease object
@@ -21,6 +20,7 @@ Scene* GameScene::createScene(int level)
     theta=0;
     // 'layer' is an autorelease object
     levelNo=level;
+    rMax=levels[levelNo].ringCount * 15;
     auto layer = GameScene::create();
 
     // add layer as a child to scene
@@ -42,7 +42,7 @@ bool GameScene::init()
         return false;
     }
     controlable=0;
-    distance=90;
+    distance=rMax;
     visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
    
@@ -56,10 +56,11 @@ bool GameScene::init()
     this->addChild(rotationPoint, 2);
     
     auto label = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",10);
-    label->setPosition(Point(visibleSize.width-label->getContentSize().width,visibleSize.height));
-    this->addChild(label);
     exitButtonWidth=label->getContentSize().width;
     exitButtonHeight=label->getContentSize().height;
+    label->setPosition(Point(visibleSize.width-exitButtonWidth,visibleSize.height-exitButtonHeight));
+    this->addChild(label);
+    
 
     fixedPoint = Node::create();
     fixedPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
@@ -86,14 +87,14 @@ bool GameScene::init()
     {   
        
         snake[i] = DrawNode::create();
-        snake[i]->drawDot(Vec2(90*cos(theta),90*sin(theta)),2,Color4F(100,0,0,1));
+        snake[i]->drawDot(Vec2(rMax*cos(theta),rMax*sin(theta)),2,Color4F(100,0,0,1));
         theta+=2*M_PI/150;
       //  this->addChild(snake[i],2);
         rotationPoint->addChild(snake[i]);
     }
     */
-    
-   for(r=15;r<=90;r+=15)
+   
+   for(r=15;r<=rMax;r+=15)
     {
       for(theta=0;theta<=2*M_PI;theta+=2*M_PI/r){
           pathNode = DrawNode::create();
@@ -104,8 +105,8 @@ bool GameScene::init()
 
     
          
-         for(int i=0;i<levels[levelNo].count;i++)
-	{   CCPoint vertices[720]; int index=0;
+         for(int i=0;i<levels[levelNo].obstacleCount;i++)
+	{   Point vertices[720]; int index=0;
                  int base=levels[levelNo].blocks[i].ring*15;
 
    
@@ -120,16 +121,16 @@ bool GameScene::init()
           
         }
    
-           
-       CCDrawNode* polygon = CCDrawNode::create();
+        
+       DrawNode* polygon = DrawNode::create();
 
 	polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
 	fixedPoint->addChild(polygon);
 	}
         
-    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+90,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
 
-    distance=90;
+    distance=rMax;
    // auto rotateBy = RotateBy::create(0.25f,360/distance);
    // rotationPoint->runAction(RepeatForever::create(rotateBy));
     controlable=0;
@@ -184,7 +185,7 @@ void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
-  for(int i=0;i<levels[levelNo].count;i++)
+  for(int i=0;i<levels[levelNo].obstacleCount;i++)
    {              // CCLOG("Distance=%f",distance);
          if(levels[levelNo].blocks[i].ring*15==distance || levels[levelNo].blocks[i].ring*15+15==distance)
            {
@@ -205,8 +206,8 @@ if(controlable==1){
 		 if(curTheta>=levels[levelNo].blocks[i].theta1 && curTheta<=levels[levelNo].blocks[i].theta2)
                  {
                              controlable=0;
-                         int diff=90-distance;
-                             distance=90;
+                         int diff=rMax-distance;
+                             distance=rMax;
   auto rotateBy = RotateBy::create(0.25f,0);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 
