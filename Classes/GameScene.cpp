@@ -16,6 +16,7 @@ int secondCount=0;
 int minuteCount=0;
 float obstacleSpeed=0;
 Label *timer;
+
 Scene* GameScene::createScene(int level)
 {
     // 'scene' is an autorelease object
@@ -72,7 +73,7 @@ bool GameScene::init()
     
     timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",10);
     timer->setPosition(Point(timer->getContentSize().width,visibleSize.height-timer->getContentSize().height));
-    this->schedule(schedule_selector(GameScene::updateClock),1.0f);
+    this->schedule(schedule_selector(GameScene::updateClock),0.2f);
     this->addChild(timer);
     
     obstacleRotationPoint = Node::create();
@@ -221,7 +222,8 @@ void GameScene::updateClock(float dt)
     if(secondCount == 60) {secondCount=0; minuteCount++;}
    // std::stringstream stream;
    // stream << secondCount;
-    char secondText[3];  char minuteText[4];
+   char secondText[3];  char minuteText[3];
+    char timeText[6];
     if(secondCount<10)
     {
         sprintf(secondText,"0%d",secondCount);
@@ -231,13 +233,15 @@ void GameScene::updateClock(float dt)
     
     if(minuteCount<10)
     {
-        sprintf(minuteText,"0%d:",minuteCount);
+        sprintf(minuteText,"0%d",minuteCount);
     }
     else
-        sprintf(minuteText,"%d:",minuteCount);
+        sprintf(minuteText,"%d",minuteCount);
 
-    timer->setString(strcat(minuteText,secondText));
+    sprintf(timeText,"%s:%s",minuteText,secondText);
+    timer->setString(timeText);
 }
+
 void GameScene::actionComplete()
 {
     if(distance==0)
@@ -257,8 +261,8 @@ controlable=1;
 
 void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
-    int rotaionValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
-    rotaionValue=rotaionValue==360?0:rotaionValue;
+    int rotationValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
+    rotationValue=rotationValue==360?0:rotationValue;
     
   //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
@@ -269,7 +273,7 @@ if(controlable==1){
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 
- 		Size visibleSize = Director::getInstance()->getVisibleSize();
+ 		        Size visibleSize = Director::getInstance()->getVisibleSize();
                 Vec2 origin = Director::getInstance()->getVisibleOrigin();
                 int originY=visibleSize.height/2+origin.y;
                 int snakeY=snakePosition.y;
@@ -281,12 +285,12 @@ if(controlable==1){
                      // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
 		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
-               int lower =((int)((levels[levelNo].blocks[i].theta1 * 180/M_PI)+rotaionValue)) % 360;
-               int upper =((int)((levels[levelNo].blocks[i].theta2 * 180/M_PI)+rotaionValue)) % 360;
+               int lower =((int)((levels[levelNo].blocks[i].theta1 * 180/M_PI)+rotationValue)) % 360;
+               int upper =((int)((levels[levelNo].blocks[i].theta2 * 180/M_PI)+rotationValue)) % 360;
 		 if(curTheta>=lower && curTheta<=upper)
                  {
                              controlable=0;
-                         int diff=rMax-distance;
+                         int diff= rMax - distance;
                              distance=rMax;
       auto rotateBy = RotateBy::create(0.25f,0);
       rotationPoint->runAction(RepeatForever::create(rotateBy));
