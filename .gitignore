@@ -1,0 +1,9 @@
+#ignore these
+/*
+
+#exclude these
+!/.gitignore
+!/Classes
+!/Resources
+!/CMakeLists.txt
+!/README.md
