@@ -22,7 +22,7 @@ struct level
 
 struct level levels[LEVEL_COUNT]={
     
-    {6,4,4,
+    {6,4,8,
         {
             {2,M_PI/2,M_PI/2+M_PI/4},
             {4,0,M_PI/4},
@@ -33,7 +33,7 @@ struct level levels[LEVEL_COUNT]={
     
     ,
     
-    {6,5,4,
+    {6,5,8,
         {
             {2,M_PI/2,M_PI/2+M_PI/4},
             {3,3*M_PI/2,3*M_PI/2+M_PI/4},
@@ -45,7 +45,7 @@ struct level levels[LEVEL_COUNT]={
     
     ,
     
-    {7,8,4,
+    {7,8,10,
         {
             {3,1.5*M_PI,1.5*M_PI+M_PI/4},
             {2,1.8*M_PI,1.8*M_PI+M_PI/4},
@@ -61,7 +61,7 @@ struct level levels[LEVEL_COUNT]={
     
     ,
     
-    {6,7,4,
+    {6,7,10,
         {
             {2,M_PI/2,M_PI/2+M_PI/4},
             {4,0,M_PI/4},//
@@ -75,7 +75,7 @@ struct level levels[LEVEL_COUNT]={
     
     ,
     
-    {7,12,4,
+    {7,12,12,
         {
             {3,1.5*M_PI,1.5*M_PI+M_PI/4},
             {2,1.8*M_PI,1.8*M_PI+M_PI/4},
@@ -96,7 +96,7 @@ struct level levels[LEVEL_COUNT]={
     
     ,
     
-    {7,8,8,
+    {7,8,12,
         {
             {4,3*M_PI/2 + M_PI/9,2*M_PI-M_PI/6},
             {5,M_PI+M_PI/5, M_PI + M_PI/2},
