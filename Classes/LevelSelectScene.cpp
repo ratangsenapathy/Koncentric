@@ -1,7 +1,7 @@
 #include "LevelSelectScene.h"
 #include "GameScene.h"
 #include "Definitions.h"
-#include "CocosGUI.h"
+#include "ui/CocosGUI.h"
 
 USING_NS_CC;
 

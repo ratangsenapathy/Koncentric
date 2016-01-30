@@ -14,6 +14,7 @@ int rMax=0;
 float objectTime;
 int secondCount=0;
 int minuteCount=0;
+float obstacleSpeed=0;
 Label *timer;
 Scene* GameScene::createScene(int level)
 {
@@ -25,6 +26,7 @@ Scene* GameScene::createScene(int level)
     // 'layer' is an autorelease object
     levelNo=level;
     rMax=levels[levelNo].ringCount * 15;
+    obstacleSpeed =levels[levelNo].obstacleSpeed;
     objectTime=1.0/levels[levelNo].speed;
     secondCount=0; minuteCount=0;
     auto layer = GameScene::create();
@@ -73,9 +75,9 @@ bool GameScene::init()
     this->schedule(schedule_selector(GameScene::updateClock),1.0f);
     this->addChild(timer);
     
-    fixedPoint = Node::create();
-    fixedPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
-    this->addChild(fixedPoint, 3);    
+    obstacleRotationPoint = Node::create();
+    obstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
+    this->addChild(obstacleRotationPoint, 3);
    #if COMPILE_FOR_MOBILE == 1
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
@@ -129,12 +131,12 @@ bool GameScene::init()
    
     for(theta=levels[levelNo].blocks[i].theta2;theta>=levels[levelNo].blocks[i].theta1;theta-=2*M_PI/(base+15)){
           
-           vertices[index++]=ccp((base+15)*cos(theta),(base+15)*sin(theta));
+           vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
           
         }
   for(theta=levels[levelNo].blocks[i].theta1;theta<=levels[levelNo].blocks[i].theta2;theta+=2*M_PI/(base!=0?base:15)){
           
-           vertices[index++]=ccp(base*cos(theta),base*sin(theta));
+           vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
           
         }
    
@@ -142,14 +144,19 @@ bool GameScene::init()
        DrawNode* polygon = DrawNode::create();
 
 	polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
-	fixedPoint->addChild(polygon);
-	}
+	obstacleRotationPoint->addChild(polygon);
+        
+        	}
         
     snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
 
     distance=rMax;
    // auto rotateBy = RotateBy::create(0.25f,360/distance);
    // rotationPoint->runAction(RepeatForever::create(rotateBy));
+    
+    auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
+    obstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
+
     controlable=0;
     this->scheduleUpdate();
     return true;
@@ -250,6 +257,10 @@ controlable=1;
 
 void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+    int rotaionValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
+    rotaionValue=rotaionValue==360?0:rotaionValue;
+    
+  //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
   for(int i=0;i<levels[levelNo].obstacleCount;i++)
@@ -262,24 +273,26 @@ if(controlable==1){
                 Vec2 origin = Director::getInstance()->getVisibleOrigin();
                 int originY=visibleSize.height/2+origin.y;
                 int snakeY=snakePosition.y;
-                 float curTheta = acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance);
+                int curTheta = (int)((acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance))*180/M_PI);
 
                   if(snakeY<originY)
-                           curTheta=2*M_PI-curTheta;
+                           curTheta=360-curTheta;
                     //  CCLOG("Distance=%f, Theta=%f",distance,curTheta*180/M_PI);
                      // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
 		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
-		 if(curTheta>=levels[levelNo].blocks[i].theta1 && curTheta<=levels[levelNo].blocks[i].theta2)
+               int lower =((int)((levels[levelNo].blocks[i].theta1 * 180/M_PI)+rotaionValue)) % 360;
+               int upper =((int)((levels[levelNo].blocks[i].theta2 * 180/M_PI)+rotaionValue)) % 360;
+		 if(curTheta>=lower && curTheta<=upper)
                  {
                              controlable=0;
                          int diff=rMax-distance;
                              distance=rMax;
-  auto rotateBy = RotateBy::create(0.25f,0);
-    rotationPoint->runAction(RepeatForever::create(rotateBy));
+      auto rotateBy = RotateBy::create(0.25f,0);
+      rotationPoint->runAction(RepeatForever::create(rotateBy));
 
            //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-                     snake[0]->runAction(Sequence::create(MoveTo::create(0.5,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                     snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
            }

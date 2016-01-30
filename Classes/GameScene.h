@@ -15,7 +15,7 @@ public:
     cocos2d::DrawNode* pathNode;
     cocos2d::DrawNode* snake[SNAKE_LENGTH];
     cocos2d::Node* rotationPoint;
-    cocos2d::Node* fixedPoint;
+    cocos2d::Node* obstacleRotationPoint;
     cocos2d::DrawNode* blocks;
     float distance;
     int exitButtonWidth;
