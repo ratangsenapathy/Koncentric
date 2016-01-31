@@ -73,7 +73,7 @@ bool GameScene::init()
     
     timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",10);
     timer->setPosition(Point(timer->getContentSize().width,visibleSize.height-timer->getContentSize().height));
-    this->schedule(schedule_selector(GameScene::updateClock),0.2f);
+    this->schedule(schedule_selector(GameScene::updateClock),1.0f);
     this->addChild(timer);
     
     obstacleRotationPoint = Node::create();
@@ -126,28 +126,34 @@ bool GameScene::init()
     
          
          for(int i=0;i<levels[levelNo].obstacleCount;i++)
-	{   Point vertices[720]; int index=0;
-                 int base=levels[levelNo].blocks[i].ring*15;
-
+         {
+            
+             int index=0;
+             int base=levels[levelNo].blocks[i].ring*15;
+             int vertexUpperCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
+             
+             int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
+             
+             Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
    
-    for(theta=levels[levelNo].blocks[i].theta2;theta>=levels[levelNo].blocks[i].theta1;theta-=2*M_PI/(base+15)){
+             for(theta=levels[levelNo].blocks[i].theta2*M_PI/180;theta>=levels[levelNo].blocks[i].theta1*M_PI/180;theta-=2*M_PI/(base+15)){
           
-           vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
+                 vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
           
-        }
-  for(theta=levels[levelNo].blocks[i].theta1;theta<=levels[levelNo].blocks[i].theta2;theta+=2*M_PI/(base!=0?base:15)){
+             }
+             for(theta=levels[levelNo].blocks[i].theta1*M_PI/180;theta<=levels[levelNo].blocks[i].theta2*M_PI/180;theta+=2*M_PI/(base!=0?base:15)){
           
-           vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
-          
-        }
+                 vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
+           
+             }
    
         
-       DrawNode* polygon = DrawNode::create();
+             DrawNode* polygon = DrawNode::create();
 
-	polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
-	obstacleRotationPoint->addChild(polygon);
-        
-        	}
+             polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
+             obstacleRotationPoint->addChild(polygon);
+             delete [] vertices;
+        }
         
     snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
 
@@ -285,8 +291,8 @@ if(controlable==1){
                      // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
 		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
-               int lower =((int)((levels[levelNo].blocks[i].theta1 * 180/M_PI)+rotationValue)) % 360;
-               int upper =((int)((levels[levelNo].blocks[i].theta2 * 180/M_PI)+rotationValue)) % 360;
+               int lower =((int)((levels[levelNo].blocks[i].theta1)+rotationValue)) % 360;
+               int upper =((int)((levels[levelNo].blocks[i].theta2)+rotationValue)) % 360;
 		 if(curTheta>=lower && curTheta<=upper)
                  {
                              controlable=0;
