@@ -5,8 +5,8 @@
 #define TRANSITION_TIME 0.5
 #define INIT_SPACESHIP_ORBIT 100
 #define SNAKE_LENGTH 1
-#define LEVEL_COUNT 6
-#define NO_OF_SCROLL_PANES 1
-#define HEIGHT_DIVISION_FACTOR 6
+#define LEVEL_COUNT 6               // no of levels
+#define NO_OF_SCROLL_PANES 1       // the no of screen heights the scroll pane covers in the level select menu
+#define HEIGHT_DIVISION_FACTOR 6  // heigher this factor lesser the space between successive lines in the LevelSelectScene
 #define COMPILE_FOR_MOBILE 1
 #endif // __DEFINITIONS_H__

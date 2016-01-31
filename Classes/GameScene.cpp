@@ -9,11 +9,11 @@ USING_NS_CC;
 float theta=0;
 int r=0;
 int levelNo=0;
-int controlable=0;
-int rMax=0;
-float objectTime;
-int secondCount=0;
-int minuteCount=0;
+int controlable=0;      // flag to check if user can controll the ball or not
+int rMax=0;             // max radius of circle
+float objectTime;     // stores the inverse of speed
+int secondCount=0;    // second han value in the timer
+int minuteCount=0;   //minute hand clock in the timer
 float obstacleSpeed=0;
 Label *timer;
 
@@ -26,7 +26,7 @@ Scene* GameScene::createScene(int level)
     theta=0;
     // 'layer' is an autorelease object
     levelNo=level;
-    rMax=levels[levelNo].ringCount * 15;
+    rMax=levels[levelNo].ringCount * 15;    //setting various parameters
     obstacleSpeed =levels[levelNo].obstacleSpeed;
     objectTime=1.0/levels[levelNo].speed;
     secondCount=0; minuteCount=0;
@@ -57,23 +57,26 @@ bool GameScene::init()
    
     goal = DrawNode::create();
     goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, Color4F(100,0,0,1));
-    this->addChild(goal,1);
+    this->addChild(goal,1);          // drawing the goal
    
     
     rotationPoint = Node::create();
     rotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
     this->addChild(rotationPoint, 2);
     
-    auto label = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",10);
-    exitButtonWidth=label->getContentSize().width;
-    exitButtonHeight=label->getContentSize().height;
-    label->setPosition(Point(visibleSize.width-exitButtonWidth,visibleSize.height-exitButtonHeight));
-    this->addChild(label);
+    
+    //Setting the exit button
+    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",10);
+    exitButtonWidth=exitLabel->getContentSize().width;
+    exitButtonHeight=exitLabel->getContentSize().height;
+    exitLabel->setPosition(Point(visibleSize.width-exitButtonWidth,visibleSize.height-exitButtonHeight));
+    this->addChild(exitLabel);
     
     
+    //setting the clock
     timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",10);
     timer->setPosition(Point(timer->getContentSize().width,visibleSize.height-timer->getContentSize().height));
-    this->schedule(schedule_selector(GameScene::updateClock),1.0f);
+    this->schedule(schedule_selector(GameScene::updateClock),1.0f);  //scedule to call upDateClock function every 1.0 sec
     this->addChild(timer);
     
     obstacleRotationPoint = Node::create();
@@ -113,7 +116,7 @@ bool GameScene::init()
         rotationPoint->addChild(snake[i]);
     }
     */
-   
+   //loop to draw the concentric circles
    for(r=15;r<=rMax;r+=15)
     {
       for(theta=0;theta<=2*M_PI;theta+=2*M_PI/r){
@@ -124,7 +127,6 @@ bool GameScene::init()
     }
 
     
-         
          for(int i=0;i<levels[levelNo].obstacleCount;i++)
          {
             
@@ -150,12 +152,13 @@ bool GameScene::init()
         
              DrawNode* polygon = DrawNode::create();
 
-             polygon->drawPolygon(vertices,index, ccc4f(1, 1, 0, 1), 1, ccc4f(1, 1, 0, 1));
+             polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
              obstacleRotationPoint->addChild(polygon);
              delete [] vertices;
         }
-        
-    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+
+                 
+    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
 
     distance=rMax;
    // auto rotateBy = RotateBy::create(0.25f,360/distance);
@@ -171,26 +174,25 @@ bool GameScene::init()
 
 #if COMPILE_FOR_MOBILE == 1
 bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
-{
+{   // check if exit button region was clicked
     if((touch->getLocation().x>=(visibleSize.width-2*exitButtonWidth)) && (touch->getLocation().y>=(visibleSize.height-1.5*exitButtonHeight)))
     {
         auto scene = MainMenuScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(2, scene));
         return true;
     }
-    if(controlable==1)
+    if(controlable==1)  //  otherwise move ball inwards if controllable
     {
-        controlable=0;
+        controlable=0; // while moving inwards ball should not be controllable
         distance-=15;
         auto rotateBy = RotateBy::create(objectTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),
-                                             CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
-        
+        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
+    
     return true;
 }
 //#else
@@ -221,7 +223,7 @@ void GameScene::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
 */
 #endif
 
-
+//function to update the clock
 void GameScene::updateClock(float dt)
 {
     secondCount++;
@@ -248,6 +250,8 @@ void GameScene::updateClock(float dt)
     timer->setString(timeText);
 }
 
+//after a move into the next path or outside after collision the ball should be made controllab;e againa and speed adjusted
+
 void GameScene::actionComplete()
 {
     if(distance==0)
@@ -265,6 +269,7 @@ void GameScene::actionComplete()
 controlable=1;
 }
 
+//function updates every frame
 void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
     int rotationValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
@@ -293,7 +298,7 @@ if(controlable==1){
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
                int lower =((int)((levels[levelNo].blocks[i].theta1)+rotationValue)) % 360;
                int upper =((int)((levels[levelNo].blocks[i].theta2)+rotationValue)) % 360;
-		 if(curTheta>=lower && curTheta<=upper)
+		 if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
                  {
                              controlable=0;
                          int diff= rMax - distance;

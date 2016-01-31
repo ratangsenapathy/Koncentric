@@ -5,7 +5,7 @@
 
 USING_NS_CC;
 
-
+// Scene to select levels
 Scene* LevelSelectScene::createScene()
 {
     // 'scene' is an autorelease object
@@ -53,6 +53,8 @@ bool LevelSelectScene::init()
     this->addChild(menu);
     
     */
+    
+    //Scroll View for level select
     Size scrollFrameSize = Size(visibleSize.width, visibleSize.height*0.8);
     auto scrollView = cocos2d::ui::ScrollView::create();
     scrollView->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
@@ -62,16 +64,18 @@ bool LevelSelectScene::init()
     scrollView->setDirection(cocos2d::ui::ScrollView::Direction::VERTICAL);
     auto containerSize = Size(scrollFrameSize.width, scrollFrameSize.height*NO_OF_SCROLL_PANES);
     scrollView->setInnerContainerSize(containerSize);
+    //sroll view definition
     
+    //Level select label
+    auto levelSelectLabel = Label::createWithTTF("Select a Level","fonts/Marker Felt.ttf",36);
+    levelSelectLabel->setPosition(Point(visibleSize.width/2,visibleSize.height*15/16));
     
-    auto label = Label::createWithTTF("Select a Level","fonts/Marker Felt.ttf",36);
-    label->setPosition(Point(visibleSize.width/2,visibleSize.height*15/16));
+    levelSelectLabel->setColor(cocos2d::Color3B::BLUE);
+    auto *menu = Menu::create();  //menu creation
     
-    label->setColor(cocos2d::Color3B::BLUE);
-    auto *menu = Menu::create();
     float height_factor = 0.5;
     int width_factor = 1;
-    for(int i=1;i<=LEVEL_COUNT;i++)
+    for(int i=1;i<=LEVEL_COUNT;i++)  // loop to position menu items depending on scroll view container size and various macros
     {
         std::stringstream stream;
         stream << i;
@@ -86,8 +90,8 @@ bool LevelSelectScene::init()
         if (i%5==0){height_factor++; width_factor=1;}
         
     }
-    menu->setPosition(Point(0,0));
-    this->addChild(label);
+    menu->setPosition(Point(0,0));          //position menu
+    this->addChild(levelSelectLabel);     //add items to parents
     scrollView->addChild(menu);
     this->addChild(scrollView);
     
@@ -95,7 +99,7 @@ bool LevelSelectScene::init()
     return true;
 }
 
-void LevelSelectScene::Play(cocos2d::Ref *pSender){
+void LevelSelectScene::Play(cocos2d::Ref *pSender){   //what happens when a level is selected 
     MenuItem* item = (MenuItem*) pSender;
     int levelNo =  (int)item->getTag();
     auto scene = GameScene::createScene(levelNo-1);
