@@ -20,6 +20,10 @@ public:
     float distance;
     int exitButtonWidth;
     int exitButtonHeight;
+    cocos2d::Color4F ballColor;
+    float ballRadius;
+    int ballDirection;
+    float ballInitTheta;
 //    cocos2d::Size visibleSize;
 //    cocos2d::Vec2 origin;
     // a selector callback
@@ -36,7 +40,8 @@ public:
     void update(float dt);
     void actionComplete();
     void updateClock(float dt);
-    
+    void parseJSON(std::string json);
+    cocos2d::Color4F convertHexToRBG(int hexValue);
     
 };
 

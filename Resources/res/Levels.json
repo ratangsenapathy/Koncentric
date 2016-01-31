@@ -4,170 +4,170 @@
 
 	{
 	    "ball" : {
-		"color"       : "#FF0000",
-		"speed"       : "8",
-		"radius"      : "3",
-		"initTheta"   : "0",
-		"direction"   : "1"
+		"color"       : "FF0000",
+		"speed"       : 8,
+		"radius"      : 3,
+		"initTheta"   : 0,
+		"direction"   : 1
 	    },
 	    
-	    "numOfRings"      : "6",
+	    "numOfRings"  : 6,
 	    
 	    "obstacles": [
 	
 		{
-		    "speed"   : "10",
-		    "theta1"  : "90",
-		    "theta2"  : "135",
-		    "ringNum" : "2",
+		    "speed"   : 10,
+		    "theta1"  : 90,
+		    "theta2"  : 135,
+		    "ringNum" : 2,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "0",
-		    "theta2"  : "45",
-		    "ringNum" : "4",
+		    "speed"   : 10,
+		    "theta1"  : 0,
+		    "theta2"  : 45,
+		    "ringNum" : 4,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "180",
-		    "theta2"  : "225",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 180,
+		    "theta2"  : 225,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		}
 		
 	    ],
 	    
-	    "finishedTime"    : "0"
+	    "finishedTime": "0"
 	},
 
 
 	{
 	    "ball" : {
-		"color"       : "#FF0000",
-		"speed"       : "8",
-		"radius"      : "3",
-		"initTheta"   : "0",
-		"direction"   : "1"
+		"color"       : "FF0000",
+		"speed"       : 8,
+		"radius"      : 3,
+		"initTheta"   : 0,
+		"direction"   : 1
 	    },
 	    
-	    "numOfRings":"6",
+	    "numOfRings"  : 6,
 	    
 	    "obstacles": [
 		{
-		    "speed"   : "10",
-		    "theta1"  : "90",
-		    "theta2"  : "135",
-		    "ringNum" : "2",
+		    "speed"   : 10,
+		    "theta1"  : 90,
+		    "theta2"  : 135,
+		    "ringNum" : 2,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "60",
-		    "theta2"  : "105",
-		    "ringNum" : "1",
+		    "speed"   : 10,
+		    "theta1"  : 60,
+		    "theta2"  : 105,
+		    "ringNum" : 1,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   :"10",
-		    "theta1"  : "324",
-		    "theta2"  : "369",
-		    "ringNum" : "2",
+		    "speed"   : 10,
+		    "theta1"  : 324,
+		    "theta2"  : 369,
+		    "ringNum" : 2,
 		    "color"   : "#ffff00"
 		}
 		
 	    ],
 	    
-	    "finishedTime":"0"
+	    "finishedTime": "0"
 	},
 
 	{
-            "ball" : {
-		"color"       : "#FF0000",
-		"speed"       : "10",
-		"radius"      : "10",
-		"initTheta"   : "0",
-		"direction"   : "1"
+        "ball" : {
+		"color"       : "ff0000",
+		"speed"       : 10,
+		"radius"      : 3,
+		"initTheta"   : 90,
+		"direction"   : 1
 	    },
 	
-            "numOfRings"      : "6",
+        "numOfRings"  : 7,
 	
 	    "obstacles": [
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "324",
-		    "theta2"  : "369",
-		    "ringNum" : "2",
+		    "speed"   : 10,
+		    "theta1"  : 324,
+		    "theta2"  : 369,
+		    "ringNum" : 2,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "180",
-		    "theta2"  : "225",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 180,
+		    "theta2"  : 225,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "0",
-		    "theta2"  : "45",
-		    "ringNum" : "4",
+		    "speed"   : 10,
+		    "theta1"  : 0,
+		    "theta2"  : 45,
+		    "ringNum" : 4,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "3",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 3,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "270",
-		    "theta2"  : "315",
-		    "ringNum" : "5",
+		    "speed"   : 10,
+		    "theta1"  : 270,
+		    "theta2"  : 315,
+		    "ringNum" : 5,
 		    "color"   : "#ffff00"
 		},
 		{
-		    "speed"   : "10",
-		    "theta1"  : "306",
-		    "theta2"  : "351",
-		    "ringNum" : "5",
+		    "speed"   : 10,
+		    "theta1"  : 306,
+		    "theta2"  : 351,
+		    "ringNum" : 5,
 		    "color"   : "#ffff00"
 		}
 		
 	    ],
 	    
-	    "finishedTime"    : "0"
+	    "finishedTime": "0"
 	}
 	
     ]

@@ -2,16 +2,19 @@
 #include "MainMenuScene.h"
 #include "GameOverScene.h"
 #include "Levels.h"
+#include "rapidjson/document.h"
+
 #define COCOS2D_DEBUG 1
 
 USING_NS_CC;
+using namespace rapidjson;
 
 float theta=0;
 int r=0;
 int levelNo=0;
 int controlable=0;      // flag to check if user can controll the ball or not
 int rMax=0;             // max radius of circle
-float objectTime;     // stores the inverse of speed
+float ballTime;     // stores the inverse of speed
 int secondCount=0;    // second han value in the timer
 int minuteCount=0;   //minute hand clock in the timer
 float obstacleSpeed=0;
@@ -26,9 +29,9 @@ Scene* GameScene::createScene(int level)
     theta=0;
     // 'layer' is an autorelease object
     levelNo=level;
-    rMax=levels[levelNo].ringCount * 15;    //setting various parameters
+   // rMax=levels[levelNo].ringCount * 15;    //setting various parameters
     obstacleSpeed =levels[levelNo].obstacleSpeed;
-    objectTime=1.0/levels[levelNo].speed;
+   // ballTime=1.0/levels[levelNo].speed;
     secondCount=0; minuteCount=0;
     auto layer = GameScene::create();
 
@@ -55,6 +58,11 @@ bool GameScene::init()
     visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
    
+    
+    std::string fullPath = "res/Levels.json";
+    std::string jsonFile = FileUtils::getInstance()->getStringFromFile(fullPath.c_str());
+    parseJSON(jsonFile);
+    
     goal = DrawNode::create();
     goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, Color4F(100,0,0,1));
     this->addChild(goal,1);          // drawing the goal
@@ -99,7 +107,7 @@ bool GameScene::init()
     float theta=0;
 
     snake[0] = DrawNode::create();
-    snake[0]->drawDot(Vec2(0,0),3,Color4F(100,0,0,1));
+    snake[0]->drawDot(Vec2(0,0),ballRadius,ballColor);
     theta+=2*M_PI/150;
     //this->addChild(snake[0],2);
     
@@ -194,11 +202,11 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
     {
         controlable=0; // while moving inwards ball should not be controllable
         distance-=15;
-        auto rotateBy = RotateBy::create(objectTime,0);
+        auto rotateBy = RotateBy::create(ballTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
     
@@ -273,9 +281,43 @@ void GameScene::actionComplete()
         auto scene = GameScene::createScene(++levelNo);
         Director::getInstance()->replaceScene(scene);}
     }
-         auto rotateBy = RotateBy::create(objectTime,360/distance);
+         auto rotateBy = RotateBy::create(ballTime,360/distance * ballDirection);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 controlable=1;
+}
+
+void GameScene::parseJSON(std::string json)
+{
+    Document document;
+    document.Parse<0>(json.c_str());
+    
+    if(document.HasMember("levels"))
+    {
+        
+        const rapidjson::Value& jsonLevels = document["levels"];
+        rMax = jsonLevels[(SizeType)levelNo]["numOfRings"].GetInt()*15;
+        ballTime = 1.0/jsonLevels[(SizeType)levelNo]["ball"]["speed"].GetDouble();
+        ballRadius = jsonLevels[(SizeType)levelNo]["ball"]["radius"].GetDouble();
+        std::string hexString = jsonLevels[(SizeType)levelNo]["ball"]["color"].GetString();
+        int hexValue;
+        std::stringstream ss;
+        ss << std::hex << hexString;
+        ss >> hexValue;
+        ballColor = convertHexToRBG(hexValue);
+        ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
+        ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble() * M_PI/180.0;
+        //CCLOG("Test=%d",test);
+        
+    }
+
+}
+
+Color4F GameScene::convertHexToRBG(int hexValue)
+{
+    float red = ((hexValue >> 16) & 0xFF) /255.0;  // Extract the RR byte
+    float green = ((hexValue >> 8) & 0xFF)/255.0;   // Extract the GG byte
+    float blue = ((hexValue) & 0xFF)/255.0;
+    return Color4F(red,green,blue,1);
 }
 
 //function updates every frame
@@ -316,7 +358,7 @@ if(controlable==1){
       rotationPoint->runAction(RepeatForever::create(rotateBy));
 
            //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-                     snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
            }
