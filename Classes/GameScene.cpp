@@ -137,24 +137,33 @@ bool GameScene::init()
              int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
              
              Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
-   
-             for(theta=levels[levelNo].blocks[i].theta2*M_PI/180;theta>=levels[levelNo].blocks[i].theta1*M_PI/180;theta-=2*M_PI/(base+15)){
           
-                 vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
-          
-             }
-             for(theta=levels[levelNo].blocks[i].theta1*M_PI/180;theta<=levels[levelNo].blocks[i].theta2*M_PI/180;theta+=2*M_PI/(base!=0?base:15)){
-          
-                 vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
+                        //Loops to draw obstacles
+             float lower=levels[levelNo].blocks[i].theta1*M_PI/180;
+             float upper=levels[levelNo].blocks[i].theta2*M_PI/180;
            
-             }
+                 for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
+          
+                     vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
+          
+                 }
+                 for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15)){
+          
+                     vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
+           
+                 }
    
         
-             DrawNode* polygon = DrawNode::create();
+                 DrawNode* polygon = DrawNode::create();
 
-             polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
-             obstacleRotationPoint->addChild(polygon);
-             delete [] vertices;
+                 polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
+                 obstacleRotationPoint->addChild(polygon);
+                 lower =upper;
+                 
+                      delete []vertices;
+
+                 
+             
         }
 
                  
