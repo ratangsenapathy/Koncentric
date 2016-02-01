@@ -4,7 +4,7 @@
 
 	{
 	    "ball" : {
-		"color"       : "FF0000",
+		"color"       : "#FF0000",
 		"speed"       : 8,
 		"radius"      : 3,
 		"initTheta"   : 0,
@@ -52,7 +52,7 @@
 
 	{
 	    "ball" : {
-		"color"       : "FF0000",
+		"color"       : "#FF0000",
 		"speed"       : 8,
 		"radius"      : 3,
 		"initTheta"   : 0,
@@ -105,7 +105,7 @@
 
 	{
         "ball" : {
-		"color"       : "ff0000",
+		"color"       : "#ff0000",
 		"speed"       : 10,
 		"radius"      : 3,
 		"initTheta"   : 90,

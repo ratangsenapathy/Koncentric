@@ -20,6 +20,8 @@ int minuteCount=0;   //minute hand clock in the timer
 float obstacleSpeed=0;
 Label *timer;
 
+
+
 Scene* GameScene::createScene(int level)
 {
     // 'scene' is an autorelease object
@@ -136,52 +138,53 @@ bool GameScene::init()
     }
 
     
-         for(int i=0;i<levels[levelNo].obstacleCount;i++)
-         {
+    for(int i=0;i<obstacleCount;i++)
+    {
             
-             int index=0;
-             int base=levels[levelNo].blocks[i].ring*15;
-             int vertexUpperCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
+        int index=0;
+        int base=obstacles[i].ringNum*15;
+        int vertexUpperCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
              
-             int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
+        int vertexLowerCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
              
-             Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
+        Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
           
                         //Loops to draw obstacles
-             float lower=levels[levelNo].blocks[i].theta1*M_PI/180;
-             float upper=levels[levelNo].blocks[i].theta2*M_PI/180;
+        float lower=obstacles[i].theta1*M_PI/180;
+        float upper=obstacles[i].theta2*M_PI/180;
            
-                 for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
+            for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15))
+            {
           
-                     vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
+                vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
           
-                 }
-                 for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15)){
+            }
+            for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15))
+            {
           
-                     vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
+                vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
            
-                 }
+            }
    
         
-                 DrawNode* polygon = DrawNode::create();
-
-                 polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
-                 obstacleRotationPoint->addChild(polygon);
-                 lower =upper;
+            DrawNode* polygon = DrawNode::create();
+        
+            Color4F obstacleColor = convertHexToRBG(obstacles[i].color);
+            polygon->drawPolygon(vertices,index, obstacleColor, 1, obstacleColor);
+            obstacleRotationPoint->addChild(polygon);
+            lower =upper;
                  
-                      delete []vertices;
+            delete []vertices;
 
                  
              
-        }
+    }
  
                  
     snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+rMax*sin(ballInitTheta*M_PI/180)))
                 ,CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
 
     distance=rMax;
-   // auto rotateBy = RotateBy::create(0.25f,360/distance);
-   // rotationPoint->runAction(RepeatForever::create(rotateBy));
     
     auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
     obstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
@@ -285,24 +288,29 @@ void GameScene::setInitThetaForBall()
 void GameScene::actionComplete()
 {
     if(distance==0)
-    {   if(levelNo+1==LEVEL_COUNT)
-    {   _eventDispatcher->removeAllEventListeners();
-        auto scene = GameOverScene::createScene();
-        Director::getInstance()->replaceScene(scene);
-    }else{
-        _eventDispatcher->removeAllEventListeners();
-        auto scene = GameScene::createScene(++levelNo);
-        Director::getInstance()->replaceScene(scene);}
+    {
+        delete [] obstacles;
+        if(levelNo+1==LEVEL_COUNT)
+        {
+            _eventDispatcher->removeAllEventListeners();
+            auto scene = GameOverScene::createScene();
+            Director::getInstance()->replaceScene(scene);
+        }
+        else
+        {
+            _eventDispatcher->removeAllEventListeners();
+            auto scene = GameScene::createScene(++levelNo);
+            Director::getInstance()->replaceScene(scene);
+        }
     }
     
-         auto rotateBy = RotateBy::create(ballTime,360/distance * ballDirection);
+    auto rotateBy = RotateBy::create(ballTime,360/distance * ballDirection);
    
     
-        rotationPoint->runAction(RepeatForever::create(rotateBy));
+    rotationPoint->runAction(RepeatForever::create(rotateBy));
     
     
-    
-controlable=1;
+    controlable=1;
 }
 
 void GameScene::parseJSON(std::string json)
@@ -318,21 +326,34 @@ void GameScene::parseJSON(std::string json)
         ballTime = 1.0/jsonLevels[(SizeType)levelNo]["ball"]["speed"].GetDouble();
         ballRadius = jsonLevels[(SizeType)levelNo]["ball"]["radius"].GetDouble();
         std::string hexString = jsonLevels[(SizeType)levelNo]["ball"]["color"].GetString();
-        int hexValue;
-        std::stringstream ss;
-        ss << std::hex << hexString;
-        ss >> hexValue;
-        ballColor = convertHexToRBG(hexValue);
+        
+        ballColor = convertHexToRBG(hexString);
         ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
         ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble();
         //CCLOG("Test=%d",test);
+        const rapidjson::Value& jsonObstacles = jsonLevels[(SizeType)levelNo]["obstacles"];
+        obstacleCount=jsonObstacles.Size();
+        obstacles = new struct obstacle[obstacleCount];
         
+        for (SizeType i = 0; i < obstacleCount; i++)
+        {
+            obstacles[i].speed = jsonObstacles[i]["speed"].GetDouble();
+            obstacles[i].theta1 = jsonObstacles[i]["theta1"].GetDouble();
+            obstacles[i].theta2 = jsonObstacles[i]["theta2"].GetDouble();
+            obstacles[i].ringNum= jsonObstacles[i]["ringNum"].GetInt();
+            obstacles[i].color = (char*)jsonObstacles[i]["color"].GetString();
+           
+        }
     }
 
 }
 
-Color4F GameScene::convertHexToRBG(int hexValue)
+Color4F GameScene::convertHexToRBG(std::string hexString)
 {
+    int hexValue;
+    std::stringstream ss;
+    ss << std::hex << hexString.substr(1);
+    ss >> hexValue;
     float red = ((hexValue >> 16) & 0xFF) /255.0;  // Extract the RR byte
     float green = ((hexValue >> 8) & 0xFF)/255.0;   // Extract the GG byte
     float blue = ((hexValue) & 0xFF)/255.0;
@@ -340,51 +361,47 @@ Color4F GameScene::convertHexToRBG(int hexValue)
 }
 
 //function updates every frame
-void GameScene::update(float dt){
- Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+void GameScene::update(float dt)
+{
+    Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
     int rotationValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
     rotationValue=rotationValue==360?0:rotationValue;
     
-  //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
-//CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
+
+    if(controlable==1)
+        {
+            for(int i=0;i<obstacleCount;i++)
+            {           // CCLOG("Distance=%f",distance);
+                if(obstacles[i].ringNum*15==distance || obstacles[i].ringNum*15+15==distance)
+                {
+                        Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+
+                        Size visibleSize = Director::getInstance()->getVisibleSize();
+                        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+                        int originY=visibleSize.height/2+origin.y;
+                        int snakeY=snakePosition.y;
+                        int curTheta = (int)((acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance))*180/M_PI);
+
+                        if(snakeY<originY)
+                            curTheta=360-curTheta;
+                        CCLOG("Theta=%d",curTheta);
+                        int lower =((int)((obstacles[i].theta1)+rotationValue)) % 360;
+                        int upper =((int)((obstacles[i].theta2)+rotationValue)) % 360;
+                        if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
+                        {
+                            controlable=0;
+                            int diff= rMax - distance;
+                            distance=rMax;
+                            auto rotateBy = RotateBy::create(0.25f,0);
+                            rotationPoint->runAction(RepeatForever::create(rotateBy));
+
+                     
+                            snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+diff*sin(ballInitTheta*M_PI/180))),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                            break;
+                        }
+                }
+            }
+
+        }
     
-   
-if(controlable==1){
-  for(int i=0;i<levels[levelNo].obstacleCount;i++)
-   {              // CCLOG("Distance=%f",distance);
-         if(levels[levelNo].blocks[i].ring*15==distance || levels[levelNo].blocks[i].ring*15+15==distance)
-           {
-                      Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
-
- 		        Size visibleSize = Director::getInstance()->getVisibleSize();
-                Vec2 origin = Director::getInstance()->getVisibleOrigin();
-                int originY=visibleSize.height/2+origin.y;
-                int snakeY=snakePosition.y;
-                int curTheta = (int)((acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance))*180/M_PI);
-
-                  if(snakeY<originY)
-                           curTheta=360-curTheta;
-                    //  CCLOG("Distance=%f, Theta=%f",distance,curTheta*180/M_PI);
-                     // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
-		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
-		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
-               int lower =((int)((levels[levelNo].blocks[i].theta1)+rotationValue)) % 360;
-               int upper =((int)((levels[levelNo].blocks[i].theta2)+rotationValue)) % 360;
-		 if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
-                 {
-                             controlable=0;
-                         int diff= rMax - distance;
-                             distance=rMax;
-      auto rotateBy = RotateBy::create(0.25f,0);
-      rotationPoint->runAction(RepeatForever::create(rotateBy));
-
-           //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+diff*sin(ballInitTheta*M_PI/180))),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
-                           break;
-                 }
-           }
-   }
-
-  }
-    
-}
+    }

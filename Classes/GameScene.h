@@ -9,6 +9,14 @@ class GameScene : public cocos2d::Layer
 {
 public:
     static cocos2d::Scene* createScene(int level);
+    struct obstacle
+    {
+        float speed;
+        float theta1;
+        float theta2;
+        int ringNum;
+        char *color;
+    };
     virtual bool init();
     cocos2d::Size visibleSize;
     cocos2d::DrawNode* goal;
@@ -24,9 +32,9 @@ public:
     float ballRadius;
     int ballDirection;
     float ballInitTheta;
-//    cocos2d::Size visibleSize;
-//    cocos2d::Vec2 origin;
-    // a selector callback
+    int obstacleCount;
+    
+    struct obstacle *obstacles;
     void menuCloseCallback(cocos2d::Ref* pSender);
     
     // implement the "static create()" method manually
@@ -42,7 +50,8 @@ public:
     void updateClock(float dt);
     void parseJSON(std::string json);
     void setInitThetaForBall();
-    cocos2d::Color4F convertHexToRBG(int hexValue);
+    cocos2d::Color4F convertHexToRBG(std::string hexString);
+    
     
 };
 
