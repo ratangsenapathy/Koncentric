@@ -70,6 +70,7 @@ bool GameScene::init()
     
     rotationPoint = Node::create();
     rotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
+    
     this->addChild(rotationPoint, 2);
     
     
@@ -173,9 +174,10 @@ bool GameScene::init()
                  
              
         }
-
+ 
                  
-    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
+    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+rMax*sin(ballInitTheta*M_PI/180)))
+                ,CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
 
     distance=rMax;
    // auto rotateBy = RotateBy::create(0.25f,360/distance);
@@ -206,7 +208,7 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-15*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y-15*sin(ballInitTheta*M_PI/180))),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
     
@@ -269,6 +271,17 @@ void GameScene::updateClock(float dt)
 
 //after a move into the next path or outside after collision the ball should be made controllab;e againa and speed adjusted
 
+
+void GameScene::setInitThetaForBall()
+{   if (ballInitTheta!=0)
+    {
+        auto rotationPointInitRotateBy = RotateBy::create(0.0f, ballInitTheta*-1);
+        rotationPoint->runAction(rotationPointInitRotateBy);
+        ballInitTheta=0;
+
+    }
+}
+
 void GameScene::actionComplete()
 {
     if(distance==0)
@@ -281,8 +294,14 @@ void GameScene::actionComplete()
         auto scene = GameScene::createScene(++levelNo);
         Director::getInstance()->replaceScene(scene);}
     }
+    
          auto rotateBy = RotateBy::create(ballTime,360/distance * ballDirection);
-    rotationPoint->runAction(RepeatForever::create(rotateBy));
+   
+    
+        rotationPoint->runAction(RepeatForever::create(rotateBy));
+    
+    
+    
 controlable=1;
 }
 
@@ -305,7 +324,7 @@ void GameScene::parseJSON(std::string json)
         ss >> hexValue;
         ballColor = convertHexToRBG(hexValue);
         ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
-        ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble() * M_PI/180.0;
+        ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble();
         //CCLOG("Test=%d",test);
         
     }
@@ -328,6 +347,8 @@ void GameScene::update(float dt){
     
   //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
+    
+   
 if(controlable==1){
   for(int i=0;i<levels[levelNo].obstacleCount;i++)
    {              // CCLOG("Distance=%f",distance);
@@ -358,7 +379,7 @@ if(controlable==1){
       rotationPoint->runAction(RepeatForever::create(rotateBy));
 
            //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+diff*sin(ballInitTheta*M_PI/180))),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
            }

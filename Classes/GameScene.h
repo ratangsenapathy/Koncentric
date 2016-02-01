@@ -41,6 +41,7 @@ public:
     void actionComplete();
     void updateClock(float dt);
     void parseJSON(std::string json);
+    void setInitThetaForBall();
     cocos2d::Color4F convertHexToRBG(int hexValue);
     
 };
