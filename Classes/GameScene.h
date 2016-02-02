@@ -16,25 +16,39 @@ public:
         float theta2;
         int ringNum;
         char *color;
+        cocos2d::Node* rotationPoint;
     };
+    
+    struct uniqueSpeedEntry
+    {
+        cocos2d::Node* rotPoint;
+        float speed;
+    };
+    
     virtual bool init();
+    
     cocos2d::Size visibleSize;
     cocos2d::DrawNode* goal;
     cocos2d::DrawNode* pathNode;
     cocos2d::DrawNode* snake[SNAKE_LENGTH];
     cocos2d::Node* rotationPoint;
     cocos2d::Node* obstacleRotationPoint;
+  //  std::set<uniqueSpeedEntry> obstacleRotationPoints;
     cocos2d::DrawNode* blocks;
+    cocos2d::Color4F ballColor;
     float distance;
+    float ballRadius;
+    float ballInitTheta;
     int exitButtonWidth;
     int exitButtonHeight;
-    cocos2d::Color4F ballColor;
-    float ballRadius;
+    int secondCount;
+    int minuteCount;
     int ballDirection;
-    float ballInitTheta;
     int obstacleCount;
-    
+   // unsigned int uniqueObstacleSpeedCount;
     struct obstacle *obstacles;
+   // std::set<float> uniqueObstacleSpeeds;
+    
     void menuCloseCallback(cocos2d::Ref* pSender);
     
     // implement the "static create()" method manually

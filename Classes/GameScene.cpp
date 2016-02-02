@@ -15,8 +15,6 @@ int levelNo=0;
 int controlable=0;      // flag to check if user can controll the ball or not
 int rMax=0;             // max radius of circle
 float ballTime;     // stores the inverse of speed
-int secondCount=0;    // second han value in the timer
-int minuteCount=0;   //minute hand clock in the timer
 float obstacleSpeed=0;
 Label *timer;
 
@@ -34,7 +32,7 @@ Scene* GameScene::createScene(int level)
    // rMax=levels[levelNo].ringCount * 15;    //setting various parameters
     obstacleSpeed =levels[levelNo].obstacleSpeed;
    // ballTime=1.0/levels[levelNo].speed;
-    secondCount=0; minuteCount=0;
+    
     auto layer = GameScene::create();
 
     // add layer as a child to scene
@@ -59,8 +57,9 @@ bool GameScene::init()
     distance=rMax;
     visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-   
     
+    secondCount=0; minuteCount=0;
+
     std::string fullPath = "res/Levels.json";
     std::string jsonFile = FileUtils::getInstance()->getStringFromFile(fullPath.c_str());
     parseJSON(jsonFile);
@@ -199,6 +198,7 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {   // check if exit button region was clicked
     if((touch->getLocation().x>=(visibleSize.width-2*exitButtonWidth)) && (touch->getLocation().y>=(visibleSize.height-1.5*exitButtonHeight)))
     {
+        delete [] obstacles;
         auto scene = MainMenuScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(2, scene));
         return true;
@@ -317,6 +317,8 @@ void GameScene::parseJSON(std::string json)
 {
     Document document;
     document.Parse<0>(json.c_str());
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
     
     if(document.HasMember("levels"))
     {
@@ -342,8 +344,42 @@ void GameScene::parseJSON(std::string json)
             obstacles[i].theta2 = jsonObstacles[i]["theta2"].GetDouble();
             obstacles[i].ringNum= jsonObstacles[i]["ringNum"].GetInt();
             obstacles[i].color = (char*)jsonObstacles[i]["color"].GetString();
+            
+            /*if(uniqueObstacleSpeeds.find(obstacles[i].speed) != uniqueObstacleSpeeds.end())
+            {
+                uniqueObstacleSpeeds.insert(obstacles[i].speed);
+                Node* rotPoint = Node::create();
+                rotPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
+                
+                auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
+                rotPoint->runAction(RepeatForever::create(obstacleRotate));
+                obstacles[i].rotationPoint=rotationPoint;
+                
+                uniqueSpeedEntry entry= {rotPoint, obstacles[i].speed};
+                
+                obstacleRotationPoints.insert(entry);
+                
+            }
+            else
+            {
+                std::set<uniqueSpeedEntry>::iterator it;
+                
+                for (it = obstacleRotationPoints.begin(); it != obstacleRotationPoints.end(); ++it)
+                {
+                    uniqueSpeedEntry entry = *it;
+                    if(entry.speed==obstacles[i].speed)
+                    {
+                        obstacles[i].rotationPoint = entry.rotPoint;
+                        break;
+                   }
+                }
+            }*/
            
         }
+        
+        
+     //   uniqueObstacleSpeeds.clear();
+     //   obstacleRotationPoints.clear();
     }
 
 }
@@ -387,7 +423,8 @@ void GameScene::update(float dt)
                         CCLOG("Theta=%d",curTheta);
                         int lower =((int)((obstacles[i].theta1)+rotationValue)) % 360;
                         int upper =((int)((obstacles[i].theta2)+rotationValue)) % 360;
-                        if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
+                    
+                        if((curTheta>=lower && curTheta<=upper) || ((lower>upper) && ((curTheta>=lower && curTheta<=360) || (curTheta<lower && curTheta<=upper))))       // check is collision occurs the second half of the or is to check for moments when upper is lesser than lower after one full rotation
                         {
                             controlable=0;
                             int diff= rMax - distance;
@@ -399,6 +436,7 @@ void GameScene::update(float dt)
                             snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff*cos(ballInitTheta*M_PI/180),snake[0]->getPosition().y+diff*sin(ballInitTheta*M_PI/180))),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                             break;
                         }
+                          
                 }
             }
 
