@@ -8,7 +8,7 @@
 class GameScene : public cocos2d::Layer
 {
 public:
-    static cocos2d::Scene* createScene(int level);
+    static cocos2d::Scene* createScene();
     virtual bool init();
     cocos2d::Size visibleSize;
     cocos2d::DrawNode* goal;
@@ -17,7 +17,17 @@ public:
     cocos2d::Node* rotationPoint;
     cocos2d::Node* obstacleRotationPoint;
     cocos2d::DrawNode* blocks;
+    int r=0;
+    int levelNo=0;
+    int controlable=0;      // flag to check if user can controll the ball or not
+    int rMax=0;             // max radius of circle
+    float objectTime;     // stores the inverse of speed
+    int secondCount=0;    // second han value in the timer
+    int minuteCount=0;   //minute hand clock in the timer
+    float obstacleSpeed=0;
+    cocos2d::Label *timer;
     float distance;
+    float theta=0;
     int exitButtonWidth;
     int exitButtonHeight;
 //    cocos2d::Size visibleSize;
@@ -36,6 +46,9 @@ public:
     void update(float dt);
     void actionComplete();
     void updateClock(float dt);
+    void loadScene();
+    void removeResources();
+    ~GameScene();
     
     
 };

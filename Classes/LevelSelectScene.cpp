@@ -102,7 +102,10 @@ bool LevelSelectScene::init()
 void LevelSelectScene::Play(cocos2d::Ref *pSender){   //what happens when a level is selected 
     MenuItem* item = (MenuItem*) pSender;
     int levelNo =  (int)item->getTag();
-    auto scene = GameScene::createScene(levelNo-1);
+    UserDefault::getInstance()->setIntegerForKey("LevelNo",levelNo-1);
+   // auto scene = GameScene::createScene(levelNo-1);
+    auto scene = GameScene::createScene();
+    
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
   
 }

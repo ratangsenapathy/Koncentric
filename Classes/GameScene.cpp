@@ -6,30 +6,30 @@
 
 USING_NS_CC;
 
-float theta=0;
-int r=0;
-int levelNo=0;
-int controlable=0;      // flag to check if user can controll the ball or not
-int rMax=0;             // max radius of circle
-float objectTime;     // stores the inverse of speed
-int secondCount=0;    // second han value in the timer
-int minuteCount=0;   //minute hand clock in the timer
-float obstacleSpeed=0;
-Label *timer;
 
-Scene* GameScene::createScene(int level)
+
+
+GameScene::~GameScene()
+{
+  
+    
+    rotationPoint->removeAllChildrenWithCleanup(true);
+    obstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    //_eventDispatcher->removeAllEventListeners();
+
+    this->unscheduleUpdate();
+}
+
+Scene* GameScene::createScene()
 {
     // 'scene' is an autorelease object
     auto scene = Scene::create();
-    controlable=0;
-    r=0;
-    theta=0;
+   
+    
     // 'layer' is an autorelease object
-    levelNo=level;
-    rMax=levels[levelNo].ringCount * 15;    //setting various parameters
-    obstacleSpeed =levels[levelNo].obstacleSpeed;
-    objectTime=1.0/levels[levelNo].speed;
-    secondCount=0; minuteCount=0;
+    
     auto layer = GameScene::create();
 
     // add layer as a child to scene
@@ -50,15 +50,41 @@ bool GameScene::init()
     {
         return false;
     }
+   
+    loadScene();
+    
+    return true;
+}
+
+void GameScene::loadScene()
+{
+    levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
+    rMax=levels[levelNo].ringCount * 15;    //setting various parameters
+    obstacleSpeed =levels[levelNo].obstacleSpeed;
+    objectTime=1.0/levels[levelNo].speed;
+    secondCount=0; minuteCount=0;
+    theta=0;
     controlable=0;
     distance=rMax;
+    r=0;
+    
     visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-   
+    
+#if COMPILE_FOR_MOBILE == 1
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->setSwallowTouches(true);
+    
+    listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
+    
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    
+#endif
+    
     goal = DrawNode::create();
     goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, Color4F(100,0,0,1));
     this->addChild(goal,1);          // drawing the goal
-   
+    
     
     rotationPoint = Node::create();
     rotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
@@ -82,108 +108,95 @@ bool GameScene::init()
     obstacleRotationPoint = Node::create();
     obstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
     this->addChild(obstacleRotationPoint, 3);
-   #if COMPILE_FOR_MOBILE == 1
-    auto listener = EventListenerTouchOneByOne::create();
-    listener->setSwallowTouches(true);
     
-    listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
-    
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-  // #else
-    /*
-    auto listener = EventListenerKeyboard::create();
-    listener->onKeyPressed = CC_CALLBACK_2(GameScene::onKeyPressed, this);
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);*/
-   #endif
     
     float theta=0;
-
+    
     snake[0] = DrawNode::create();
     snake[0]->drawDot(Vec2(0,0),3,Color4F(100,0,0,1));
     theta+=2*M_PI/150;
     //this->addChild(snake[0],2);
     
     rotationPoint->addChild(snake[0]);
-      // fixedPoint->addChild(snake[0]);
-/*
-    for(int i=1;i<21;i++)
-    {   
-       
-        snake[i] = DrawNode::create();
-        snake[i]->drawDot(Vec2(rMax*cos(theta),rMax*sin(theta)),2,Color4F(100,0,0,1));
-        theta+=2*M_PI/150;
-      //  this->addChild(snake[i],2);
-        rotationPoint->addChild(snake[i]);
-    }
-    */
-   //loop to draw the concentric circles
-   for(r=15;r<=rMax;r+=15)
-    {
-      for(theta=0;theta<=2*M_PI;theta+=2*M_PI/r){
-          pathNode = DrawNode::create();
-          pathNode->drawDot(Vec2(r*cos(theta)+origin.x+visibleSize.width/2,r*sin(theta)+origin.y+visibleSize.height/2),1,Color4F(0,0,10,1));
-           this->addChild(pathNode,1);
-        }
-    }
-
+    // fixedPoint->addChild(snake[0]);
     
-         for(int i=0;i<levels[levelNo].obstacleCount;i++)
-         {
-            
-             int index=0;
-             int base=levels[levelNo].blocks[i].ring*15;
-             int vertexUpperCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
-             
-             int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
-             
-             Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
-          
-                        //Loops to draw obstacles
-             float lower=levels[levelNo].blocks[i].theta1*M_PI/180;
-             float upper=levels[levelNo].blocks[i].theta2*M_PI/180;
-           
-                 for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
-          
-                     vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
-          
-                 }
-                 for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15)){
-          
-                     vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
-           
-                 }
-   
-        
-                 DrawNode* polygon = DrawNode::create();
-
-                 polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
-                 obstacleRotationPoint->addChild(polygon);
-                 lower =upper;
-                 
-                      delete []vertices;
-
-                 
-             
+    
+    //loop to draw the concentric circles
+    
+    for(r=15;r<=rMax;r+=15)
+    {
+        for(theta=0;theta<=2*M_PI;theta+=2*M_PI/r){
+            pathNode = DrawNode::create();
+            pathNode->drawDot(Vec2(r*cos(theta)+origin.x+visibleSize.width/2,r*sin(theta)+origin.y+visibleSize.height/2),1,Color4F(0,0,10,1));
+            //pathNode->autorelease();
+            this->addChild(pathNode,1);
+            //this->removeChild(pathNode);
         }
-
-                 
+    }
+    
+    
+    for(int i=0;i<levels[levelNo].obstacleCount;i++)
+    {
+        
+        int index=0;
+        int base=levels[levelNo].blocks[i].ring*15;
+        int vertexUpperCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
+        
+        int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
+        
+        Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
+        
+        //Loops to draw obstacles
+        float lower=levels[levelNo].blocks[i].theta1*M_PI/180;
+        float upper=levels[levelNo].blocks[i].theta2*M_PI/180;
+        
+        for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
+            
+            vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
+            
+        }
+        for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15)){
+            
+            vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
+            
+        }
+        
+        
+        DrawNode* polygon = DrawNode::create();
+        
+        polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
+        obstacleRotationPoint->addChild(polygon);
+        lower =upper;
+        
+        delete []vertices;
+        
+        
+        
+    }
+    
+    
     snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
-
+    
     distance=rMax;
-   // auto rotateBy = RotateBy::create(0.25f,360/distance);
-   // rotationPoint->runAction(RepeatForever::create(rotateBy));
+    // auto rotateBy = RotateBy::create(0.25f,360/distance);
+    // rotationPoint->runAction(RepeatForever::create(rotateBy));
     
     auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
     obstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
-
+    
     controlable=0;
     this->scheduleUpdate();
-    return true;
 }
 
 #if COMPILE_FOR_MOBILE == 1
 bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {   // check if exit button region was clicked
+    //_eventDispatcher->removeAllEventListeners();
+    //auto scene = GameScene::createScene(levelNo);
+   // auto scene = GameScene::createScene();
+   // Director::getInstance()->replaceScene(scene);
+   // return true;
+
     if((touch->getLocation().x>=(visibleSize.width-2*exitButtonWidth)) && (touch->getLocation().y>=(visibleSize.height-1.5*exitButtonHeight)))
     {
         auto scene = MainMenuScene::createScene();
@@ -264,18 +277,41 @@ void GameScene::updateClock(float dt)
 void GameScene::actionComplete()
 {
     if(distance==0)
-    {   if(levelNo+1==LEVEL_COUNT)
-    {   _eventDispatcher->removeAllEventListeners();
-        auto scene = GameOverScene::createScene();
-        Director::getInstance()->replaceScene(scene);
-    }else{
-        _eventDispatcher->removeAllEventListeners();
-        auto scene = GameScene::createScene(++levelNo);
-        Director::getInstance()->replaceScene(scene);}
+    {
+       
+        
+        if(levelNo+1==LEVEL_COUNT)
+        {   _eventDispatcher->removeAllEventListeners();
+            auto scene = GameOverScene::createScene();
+            Director::getInstance()->replaceScene(scene);
+            return;
+        }
+        else{
+            
+            _eventDispatcher->removeAllEventListeners();
+            //auto scene = GameScene::createScene(levelNo);
+            //auto scene = GameScene::createScene();
+            //Director::getInstance()->replaceScene(scene);
+            removeResources();
+            UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
+            loadScene();
+            return;
+        }
     }
          auto rotateBy = RotateBy::create(objectTime,360/distance);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 controlable=1;
+}
+
+void GameScene::removeResources()
+{
+    rotationPoint->removeAllChildrenWithCleanup(true);
+    obstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    //_eventDispatcher->removeAllEventListeners();
+    
+    this->unscheduleUpdate();
 }
 
 //function updates every frame
