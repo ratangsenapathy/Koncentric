@@ -1,18 +1,20 @@
 #include "GameScene.h"
 #include "MainMenuScene.h"
 #include "GameOverScene.h"
-#include "Levels.h"
+//#include "Levels.h"
+
+
 #define COCOS2D_DEBUG 1
 
 USING_NS_CC;
-
+using namespace rapidjson;
 
 
 
 GameScene::~GameScene()
 {
   
-    
+    delete []obstacles;
     rotationPoint->removeAllChildrenWithCleanup(true);
     obstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
@@ -51,6 +53,11 @@ bool GameScene::init()
         return false;
     }
    
+    std::string fullPath = "res/Levels.json";
+    std::string jsonFile = FileUtils::getInstance()->getStringFromFile(fullPath.c_str());
+    levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
+    generateJSON(jsonFile);
+    
     loadScene();
     
     return true;
@@ -58,10 +65,10 @@ bool GameScene::init()
 
 void GameScene::loadScene()
 {
-    levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
-    rMax=levels[levelNo].ringCount * 15;    //setting various parameters
-    obstacleSpeed =levels[levelNo].obstacleSpeed;
-    objectTime=1.0/levels[levelNo].speed;
+    
+    
+    obstacleSpeed =10;
+    
     secondCount=0; minuteCount=0;
     theta=0;
     controlable=0;
@@ -70,6 +77,8 @@ void GameScene::loadScene()
     
     visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
+    
     
 #if COMPILE_FOR_MOBILE == 1
     auto listener = EventListenerTouchOneByOne::create();
@@ -113,7 +122,7 @@ void GameScene::loadScene()
     float theta=0;
     
     snake[0] = DrawNode::create();
-    snake[0]->drawDot(Vec2(0,0),3,Color4F(100,0,0,1));
+    snake[0]->drawDot(Vec2(0,0),ballRadius,ballColor);
     theta+=2*M_PI/150;
     //this->addChild(snake[0],2);
     
@@ -135,20 +144,20 @@ void GameScene::loadScene()
     }
     
     
-    for(int i=0;i<levels[levelNo].obstacleCount;i++)
+    for(int i=0;i<obstacleCount;i++)
     {
         
         int index=0;
-        int base=levels[levelNo].blocks[i].ring*15;
-        int vertexUpperCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
+        int base=obstacles[i].ringNum*15;
+        int vertexUpperCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
         
-        int vertexLowerCount= (int)ceil((levels[levelNo].blocks[i].theta2*M_PI/180-levels[levelNo].blocks[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
+        int vertexLowerCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
         
         Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
         
         //Loops to draw obstacles
-        float lower=levels[levelNo].blocks[i].theta1*M_PI/180;
-        float upper=levels[levelNo].blocks[i].theta2*M_PI/180;
+        float lower=obstacles[i].theta1*M_PI/180;
+        float upper=obstacles[i].theta2*M_PI/180;
         
         for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
             
@@ -161,15 +170,15 @@ void GameScene::loadScene()
             
         }
         
-        
+        Color4F obstacleColor = convertHexToRBG(obstacles[i].color);
         DrawNode* polygon = DrawNode::create();
         
-        polygon->drawPolygon(vertices,index, Color4F(1, 1, 0, 1), 1, Color4F(1, 1, 0, 1));
+        polygon->drawPolygon(vertices,index, obstacleColor, 1, obstacleColor);
         obstacleRotationPoint->addChild(polygon);
         lower =upper;
         
         delete []vertices;
-        
+        vertices=NULL;
         
         
     }
@@ -186,6 +195,61 @@ void GameScene::loadScene()
     
     controlable=0;
     this->scheduleUpdate();
+}
+
+void GameScene::generateJSON(std::string jsonFile)
+{
+    
+    document.Parse<0>(jsonFile.c_str());
+    parseJSON();
+}
+
+void GameScene::parseJSON()
+{
+    
+    if(document.HasMember("levels"))
+    {
+        
+        const rapidjson::Value& jsonLevels = document["levels"];
+        noOfLevels=jsonLevels.Size();
+        rMax = jsonLevels[(SizeType)levelNo]["numOfRings"].GetInt()*15;
+        ballTime = 1.0/jsonLevels[(SizeType)levelNo]["ball"]["speed"].GetDouble();
+        ballRadius = jsonLevels[(SizeType)levelNo]["ball"]["radius"].GetDouble();
+        std::string hexString = jsonLevels[(SizeType)levelNo]["ball"]["color"].GetString();
+        
+        ballColor = convertHexToRBG(hexString);
+        ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
+        ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble();
+        //CCLOG("Test=%d",test);
+        const rapidjson::Value& jsonObstacles = jsonLevels[(SizeType)levelNo]["obstacles"];
+        obstacleCount=jsonObstacles.Size();
+        obstacles = new struct obstacle[obstacleCount];
+        
+        for (SizeType i = 0; i < obstacleCount; i++)
+        {
+            //obstacles[i].speed = jsonObstacles[i]["speed"].GetDouble();
+            obstacles[i].theta1 = jsonObstacles[i]["theta1"].GetDouble();
+            obstacles[i].theta2 = jsonObstacles[i]["theta2"].GetDouble();
+            obstacles[i].ringNum= jsonObstacles[i]["ringNum"].GetInt();
+            obstacles[i].color = (char*)jsonObstacles[i]["color"].GetString();
+            
+        }
+        
+        
+    }
+    
+}
+
+Color4F GameScene::convertHexToRBG(std::string hexString)
+{
+    int hexValue;
+    std::stringstream ss;
+    ss << std::hex << hexString.substr(1);
+    ss >> hexValue;
+    float red = ((hexValue >> 16) & 0xFF) /255.0;  // Extract the RR byte
+    float green = ((hexValue >> 8) & 0xFF)/255.0;   // Extract the GG byte
+    float blue = ((hexValue) & 0xFF)/255.0;
+    return Color4F(red,green,blue,1);
 }
 
 #if COMPILE_FOR_MOBILE == 1
@@ -207,11 +271,11 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
     {
         controlable=0; // while moving inwards ball should not be controllable
         distance-=15;
-        auto rotateBy = RotateBy::create(objectTime,0);
+        auto rotateBy = RotateBy::create(ballTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
     
@@ -280,7 +344,7 @@ void GameScene::actionComplete()
     {
        
         
-        if(levelNo+1==LEVEL_COUNT)
+        if(levelNo+1==noOfLevels)
         {   _eventDispatcher->removeAllEventListeners();
             auto scene = GameOverScene::createScene();
             Director::getInstance()->replaceScene(scene);
@@ -294,17 +358,20 @@ void GameScene::actionComplete()
             //Director::getInstance()->replaceScene(scene);
             removeResources();
             UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
+            parseJSON();
             loadScene();
             return;
         }
     }
-         auto rotateBy = RotateBy::create(objectTime,360/distance);
+         auto rotateBy = RotateBy::create(ballTime,360/distance);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 controlable=1;
 }
 
 void GameScene::removeResources()
 {
+    delete []obstacles;
+
     rotationPoint->removeAllChildrenWithCleanup(true);
     obstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
@@ -323,9 +390,9 @@ void GameScene::update(float dt){
   //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
-  for(int i=0;i<levels[levelNo].obstacleCount;i++)
+  for(int i=0;i<obstacleCount;i++)
    {              // CCLOG("Distance=%f",distance);
-         if(levels[levelNo].blocks[i].ring*15==distance || levels[levelNo].blocks[i].ring*15+15==distance)
+         if(obstacles[i].ringNum*15==distance || obstacles[i].ringNum*15+15==distance)
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 
@@ -341,8 +408,8 @@ if(controlable==1){
                      // float thetaone=levels[levelNo].blocks[i].theta1*180/M_PI;
 		     // float thetatwo=levels[levelNo].blocks[i].theta2*180/M_PI;
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
-               int lower =((int)((levels[levelNo].blocks[i].theta1)+rotationValue)) % 360;
-               int upper =((int)((levels[levelNo].blocks[i].theta2)+rotationValue)) % 360;
+               int lower =((int)((obstacles[i].theta1)+rotationValue)) % 360;
+               int upper =((int)((obstacles[i].theta2)+rotationValue)) % 360;
 		 if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
                  {
                              controlable=0;
@@ -352,7 +419,7 @@ if(controlable==1){
       rotationPoint->runAction(RepeatForever::create(rotateBy));
 
            //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-                     snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
            }
