@@ -31,7 +31,9 @@ bool MainMenuScene::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     auto playItem = MenuItemImage::create("res/play.png", "res/play_clicked.png", CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
-    playItem->setPosition(Point(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+    playItem->setPosition(Point(visibleSize.width/2+origin.x, visibleSize.height/2+origin.y));
+    CCLOG("%f",visibleSize.width);
+    CCLOG("%f",visibleSize.height);
     auto menu = Menu::create(playItem, NULL);
     menu->setPosition(Point::ZERO);
     this->addChild(menu);

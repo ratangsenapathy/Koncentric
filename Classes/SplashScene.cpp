@@ -32,7 +32,7 @@ bool SplashScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     this->scheduleOnce( schedule_selector(SplashScene::goToMainMenuScene), DISPLAY_TIME_SPLASH_SCENE );
     auto backgroundSprite = Sprite::create("res/planet.png");
-    backgroundSprite->setPosition(Point(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+    backgroundSprite->setPosition(Point(visibleSize.width/2 +origin.x , visibleSize.height/2 +origin.y));
     this->addChild(backgroundSprite);
     return true;
 }

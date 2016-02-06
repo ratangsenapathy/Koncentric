@@ -31,13 +31,13 @@ bool GameOverScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
     auto label = Label::createWithTTF("Game Over","fonts/Marker Felt.ttf",45);
-    label->setPosition(Point(visibleSize.width/2,visibleSize.height*3/4));
+    label->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*3/4+origin.y));
     
     label->setColor(cocos2d::Color3B::RED);
     auto goToMainMenu = MenuItemFont::create("Go to Main Menu",CC_CALLBACK_1(GameOverScene::GoToMainMenu,this));
     this->addChild(label);
     
-    goToMainMenu->setPosition(Point(visibleSize.width/2,visibleSize.height/2));
+    goToMainMenu->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height/2+origin.y));
     
     auto *menu = Menu::create(goToMainMenu,NULL);
     menu->setPosition(Point::ZERO);

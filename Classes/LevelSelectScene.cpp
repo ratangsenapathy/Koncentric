@@ -60,7 +60,7 @@ bool LevelSelectScene::init()
     scrollView->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
     scrollView->setBackGroundColor(Color3B(0, 0, 0));
     scrollView->setSize(scrollFrameSize);
-    scrollView->setPosition(Point(0,visibleSize.height*0.05));
+    scrollView->setPosition(Point(origin.x,visibleSize.height*0.05));
     scrollView->setDirection(cocos2d::ui::ScrollView::Direction::VERTICAL);
     auto containerSize = Size(scrollFrameSize.width, scrollFrameSize.height*NO_OF_SCROLL_PANES);
     scrollView->setInnerContainerSize(containerSize);
@@ -68,7 +68,7 @@ bool LevelSelectScene::init()
     
     //Level select label
     auto levelSelectLabel = Label::createWithTTF("Select a Level","fonts/Marker Felt.ttf",36);
-    levelSelectLabel->setPosition(Point(visibleSize.width/2,visibleSize.height*15/16));
+    levelSelectLabel->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*15/16));
     
     levelSelectLabel->setColor(cocos2d::Color3B::BLUE);
     auto *menu = Menu::create();  //menu creation
