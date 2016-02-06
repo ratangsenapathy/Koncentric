@@ -28,14 +28,22 @@ bool MainMenuScene::init()
     {
         return false;
     }
+    
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    auto playItem = MenuItemImage::create("res/play.png", "res/play_clicked.png", CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
+    
+    auto gameTitle = Label::createWithTTF("Koncentric", "fonts/Marker Felt.ttf", 100);
+    gameTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*3/4+origin.y));
+    gameTitle->setColor(Color3B(100,25, 200));
+    
+    auto playItem = MenuItemFont::create("Play",CC_CALLBACK_1(MainMenuScene::goToGameScene,this));
+    playItem->setColor(cocos2d::Color3B::BLUE);
+    playItem->setScale(2);
     playItem->setPosition(Point(visibleSize.width/2+origin.x, visibleSize.height/2+origin.y));
-    CCLOG("%f",visibleSize.width);
-    CCLOG("%f",visibleSize.height);
+    
     auto menu = Menu::create(playItem, NULL);
     menu->setPosition(Point::ZERO);
+    this->addChild(gameTitle);
     this->addChild(menu);
     
     
@@ -44,6 +52,10 @@ bool MainMenuScene::init()
 }
 
 void MainMenuScene::goToGameScene(cocos2d::Ref *sender){
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    _eventDispatcher->removeAllEventListeners();
+    this->unscheduleUpdate();
     auto scene = LevelSelectScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
 

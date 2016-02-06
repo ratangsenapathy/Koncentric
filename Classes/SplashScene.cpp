@@ -38,6 +38,12 @@ bool SplashScene::init()
 }
 
 void SplashScene::goToMainMenuScene(float dt){
+    
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    _eventDispatcher->removeAllEventListeners();
+    this->unscheduleUpdate();
+
     auto scene  = MainMenuScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
 }

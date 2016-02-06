@@ -29,11 +29,10 @@ bool GameOverScene::init()
     }
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    
-    auto label = Label::createWithTTF("Game Over","fonts/Marker Felt.ttf",45);
+    auto label = Label::createWithTTF("Congrats! You completed\nall the levels","fonts/Marker Felt.ttf",45,Size::ZERO,TextHAlignment::CENTER,TextVAlignment::TOP);
     label->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*3/4+origin.y));
     
-    label->setColor(cocos2d::Color3B::RED);
+    label->setColor(cocos2d::Color3B::GREEN);
     auto goToMainMenu = MenuItemFont::create("Go to Main Menu",CC_CALLBACK_1(GameOverScene::GoToMainMenu,this));
     this->addChild(label);
     

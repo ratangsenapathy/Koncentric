@@ -48,7 +48,11 @@ public:
     int exitButtonHeight;
     int ballDirection;
     int obstacleCount;
+    int levelMinUserDefault;
+    int levelSecUserDefault;
     cocos2d::Color4F ballColor;
+    cocos2d::Color4F ringColor;
+    cocos2d::Color4F goalColor;
     rapidjson::Document document;
 //    cocos2d::Size visibleSize;
 //    cocos2d::Vec2 origin;
@@ -71,6 +75,8 @@ public:
     cocos2d::Color4F convertHexToRBG(std::string hexString);
     void generateJSON(std::string jsonFile);
     void parseJSON();
+    void saveScores();
+    std::string getTimeText(int minCount,int secCount);
     ~GameScene();
     
     

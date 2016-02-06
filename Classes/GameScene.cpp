@@ -20,8 +20,8 @@ GameScene::~GameScene()
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
     //_eventDispatcher->removeAllEventListeners();
-
-    this->unscheduleUpdate();
+       this->unscheduleUpdate();
+   // this->removeAllComponents();
 }
 
 Scene* GameScene::createScene()
@@ -56,6 +56,9 @@ bool GameScene::init()
     std::string fullPath = "res/Levels.json";
     std::string jsonFile = FileUtils::getInstance()->getStringFromFile(fullPath.c_str());
     levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
+    visibleSize = Director::getInstance()->getVisibleSize();
+    origin = Director::getInstance()->getVisibleOrigin();
+    rIncrement=visibleSize.width/25;
     generateJSON(jsonFile);
     
     loadScene();
@@ -67,7 +70,7 @@ void GameScene::loadScene()
 {
     
     
-    obstacleSpeed =10;
+    //obstacleSpeed =10;
     
     secondCount=0; minuteCount=0;
     theta=0;
@@ -75,8 +78,7 @@ void GameScene::loadScene()
     distance=rMax;
     r=0;
     
-    visibleSize = Director::getInstance()->getVisibleSize();
-    origin = Director::getInstance()->getVisibleOrigin();
+  
     
     
     
@@ -91,7 +93,7 @@ void GameScene::loadScene()
 #endif
     
     goal = DrawNode::create();
-    goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, Color4F(100,0,0,1));
+    goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, goalColor);
     this->addChild(goal,1);          // drawing the goal
     
     
@@ -101,7 +103,7 @@ void GameScene::loadScene()
     
     
     //Setting the exit button
-    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",15);
+    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",16);
     exitButtonWidth=exitLabel->getContentSize().width;
     exitButtonHeight=exitLabel->getContentSize().height;
     exitLabel->setPosition(Point(visibleSize.width-exitButtonWidth+origin.x,visibleSize.height-exitButtonHeight+origin.y));
@@ -109,10 +111,31 @@ void GameScene::loadScene()
     
     
     //setting the clock
-    timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",10);
+    timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",16);
     timer->setPosition(Point(timer->getContentSize().width+origin.x,visibleSize.height-timer->getContentSize().height+origin.y));
     this->schedule(schedule_selector(GameScene::updateClock),1.0f);  //scedule to call upDateClock function every 1.0 sec
     this->addChild(timer);
+    
+    char minKey[15],secKey[15];
+    char bestTimeText[15];
+    sprintf(minKey, "BestMinKey%d",levelNo);
+    sprintf(secKey, "BestSecKey%d",levelNo);
+    int bestMin = UserDefault::getInstance()->getIntegerForKey(minKey,-1);
+    int bestSec = UserDefault::getInstance()->getIntegerForKey(secKey,-1);
+    if(bestMin==-1 || bestSec==-1)
+    {
+        sprintf(bestTimeText, "Best Time=NA");
+    }
+    else
+    {
+        sprintf(bestTimeText, "Best Time=%s",getTimeText(bestMin, bestSec).c_str());
+    }
+    auto bestTimeLabel = Label::createWithTTF(bestTimeText,"fonts/Marker Felt.ttf",16);
+    float bestTimeWidth=bestTimeLabel->getContentSize().width;
+    float bestTimeHeight=bestTimeLabel->getContentSize().height;
+    bestTimeLabel->setPosition(Point(bestTimeWidth/2+origin.x,visibleSize.height-bestTimeHeight-timer->getContentSize().height-3+origin.y));
+
+    this->addChild(bestTimeLabel);
     
     obstacleRotationPoint = Node::create();
     obstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
@@ -123,7 +146,7 @@ void GameScene::loadScene()
     
     snake[0] = DrawNode::create();
     snake[0]->drawDot(Vec2(0,0),ballRadius,ballColor);
-    //theta+=2*M_PI/150;
+    //theta+=2*M_PI/rIncrement0;
     //this->addChild(snake[0],2);
     
     rotationPoint->addChild(snake[0]);
@@ -132,11 +155,11 @@ void GameScene::loadScene()
     
     //loop to draw the concentric circles
     
-    for(r=15;r<=rMax;r+=15)
+    for(r=rIncrement;r<=rMax;r+=rIncrement)
     {
         for(theta=0;theta<=2*M_PI;theta+=2*M_PI/r){
             pathNode = DrawNode::create();
-            pathNode->drawDot(Vec2(r*cos(theta)+origin.x+visibleSize.width/2,r*sin(theta)+origin.y+visibleSize.height/2),1,Color4F(0,0,10,1));
+            pathNode->drawDot(Vec2(r*cos(theta)+origin.x+visibleSize.width/2,r*sin(theta)+origin.y+visibleSize.height/2),1,ringColor);
             //pathNode->autorelease();
             this->addChild(pathNode,1);
             //this->removeChild(pathNode);
@@ -148,10 +171,10 @@ void GameScene::loadScene()
     {
         
         int index=0;
-        int base=obstacles[i].ringNum*15;
-        int vertexUpperCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base+15)));
+        int base=obstacles[i].ringNum*rIncrement;
+        int vertexUpperCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base+rIncrement)));
         
-        int vertexLowerCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:15)));
+        int vertexLowerCount= (int)ceil((obstacles[i].theta2*M_PI/180-obstacles[i].theta1*M_PI/180)/(2*M_PI/(base!=0?base:rIncrement)));
         
         Point *vertices = new Point[vertexLowerCount+vertexUpperCount+1];
         
@@ -159,12 +182,12 @@ void GameScene::loadScene()
         float lower=obstacles[i].theta1*M_PI/180;
         float upper=obstacles[i].theta2*M_PI/180;
         
-        for(theta=upper;theta>=lower;theta-=2*M_PI/(base+15)){
+        for(theta=upper;theta>=lower;theta-=2*M_PI/(base+rIncrement)){
             
-            vertices[index++]=Vec2((base+15)*cos(theta),(base+15)*sin(theta));
+            vertices[index++]=Vec2((base+rIncrement)*cos(theta),(base+rIncrement)*sin(theta));
             
         }
-        for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:15)){
+        for(theta=lower;theta<=upper;theta+=2*M_PI/(base!=0?base:rIncrement)){
             
             vertices[index++]=Vec2(base*cos(theta),base*sin(theta));
             
@@ -212,14 +235,17 @@ void GameScene::parseJSON()
         
         const rapidjson::Value& jsonLevels = document["levels"];
         noOfLevels=jsonLevels.Size();
-        rMax = jsonLevels[(SizeType)levelNo]["numOfRings"].GetInt()*15;
+        rMax = jsonLevels[(SizeType)levelNo]["numOfRings"].GetInt()*rIncrement;
         ballTime = 1.0/jsonLevels[(SizeType)levelNo]["ball"]["speed"].GetDouble();
         ballRadius = jsonLevels[(SizeType)levelNo]["ball"]["radius"].GetDouble();
+        ringColor = convertHexToRBG(jsonLevels[(SizeType)levelNo]["ringColor"].GetString());
         std::string hexString = jsonLevels[(SizeType)levelNo]["ball"]["color"].GetString();
-        
+        goalColor = convertHexToRBG(jsonLevels[(SizeType)levelNo]["goalColor"].GetString());
         ballColor = convertHexToRBG(hexString);
         ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
         ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble();
+        
+        obstacleSpeed=jsonLevels[(SizeType)levelNo]["obstacleSpeed"].GetDouble();
         //CCLOG("Test=%d",test);
         const rapidjson::Value& jsonObstacles = jsonLevels[(SizeType)levelNo]["obstacles"];
         obstacleCount=jsonObstacles.Size();
@@ -271,12 +297,12 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
     if(controlable==1)  //  otherwise move ball inwards if controllable
     {
         controlable=0; // while moving inwards ball should not be controllable
-        distance-=15;
+        distance-=rIncrement;
         auto rotateBy = RotateBy::create(ballTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-rIncrement,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
     
@@ -295,12 +321,12 @@ void GameScene::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
     if(controlable==1)
     {
         controlable=0;
-        distance-=15;
+        distance-=rIncrement;
         auto rotateBy = RotateBy::create(objectTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
         
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-15,snake[0]->getPosition().y)),
+        snake[0]->runAction(Sequence::create(MoveTo::create(objectTime*2,Vec2(snake[0]->getPosition().x-rIncrement,snake[0]->getPosition().y)),
                                              CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
         
@@ -317,7 +343,7 @@ void GameScene::updateClock(float dt)
     if(secondCount == 60) {secondCount=0; minuteCount++;}
    // std::stringstream stream;
    // stream << secondCount;
-   char secondText[3];  char minuteText[3];
+ /*  char secondText[3];  char minuteText[3];
     char timeText[6];
     if(secondCount<10)
     {
@@ -333,7 +359,8 @@ void GameScene::updateClock(float dt)
     else
         sprintf(minuteText,"%d",minuteCount);
 
-    sprintf(timeText,"%s:%s",minuteText,secondText);
+    sprintf(timeText,"%s:%s",minuteText,secondText);*/
+    std::string timeText=getTimeText(minuteCount, secondCount);
     timer->setString(timeText);
     
 }
@@ -345,7 +372,7 @@ void GameScene::actionComplete()
     if(distance==0)
     {
        
-        
+        saveScores();
         if(levelNo+1==noOfLevels)
         {   //removeResources();
             auto scene = GameOverScene::createScene();
@@ -374,7 +401,7 @@ void GameScene::removeResources()
 {
     timer->unschedule(schedule_selector(GameScene::updateClock));
     delete []obstacles;
-    if(schedule_selector(GameScene::updateClock))
+    
     rotationPoint->removeAllChildrenWithCleanup(true);
     obstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
@@ -395,7 +422,7 @@ void GameScene::update(float dt){
 if(controlable==1){
   for(int i=0;i<obstacleCount;i++)
    {              // CCLOG("Distance=%f",distance);
-         if(obstacles[i].ringNum*15==distance || obstacles[i].ringNum*15+15==distance)
+         if(obstacles[i].ringNum*rIncrement==distance || obstacles[i].ringNum*rIncrement+rIncrement==distance)
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 
@@ -430,4 +457,58 @@ if(controlable==1){
 
   }
     
+}
+
+
+std::string GameScene::getTimeText(int minCount, int secCount)
+{
+    char secondText[3];  char minuteText[3];
+    char timeText[6];
+    if(secCount<10)
+    {
+        sprintf(secondText,"0%d",secCount);
+    }
+    else
+        sprintf(secondText,"%d",secCount);
+    
+    if(minCount<10)
+    {
+        sprintf(minuteText,"0%d",minCount);
+    }
+    else
+        sprintf(minuteText,"%d",minCount);
+     sprintf(timeText,"%s:%s",minuteText,secondText);
+    return timeText;
+    
+}
+
+void GameScene::saveScores()
+{
+    char minKey[15],secKey[15];
+    sprintf(minKey, "BestMinKey%d",levelNo);
+    sprintf(secKey, "BestSecKey%d",levelNo);
+    int bestMin = UserDefault::getInstance()->getIntegerForKey(minKey,-1);
+    
+    int bestSec = UserDefault::getInstance()->getIntegerForKey(secKey,-1);
+    
+    if(bestMin==-1 || bestSec==-1)
+    {
+        UserDefault::getInstance()->setIntegerForKey(minKey, minuteCount);
+        UserDefault::getInstance()->setIntegerForKey(secKey, secondCount);
+    }
+    else
+        if(minuteCount<bestMin)
+        {
+            UserDefault::getInstance()->setIntegerForKey(minKey, minuteCount);
+            UserDefault::getInstance()->setIntegerForKey(secKey, secondCount);
+        }
+        else
+            if(minuteCount==bestMin && secondCount<bestSec)
+            {
+                UserDefault::getInstance()->setIntegerForKey(minKey, minuteCount);
+                UserDefault::getInstance()->setIntegerForKey(secKey, secondCount);
+            }
+    
+    
+
 }

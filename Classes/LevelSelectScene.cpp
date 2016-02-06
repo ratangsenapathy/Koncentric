@@ -104,6 +104,11 @@ void LevelSelectScene::Play(cocos2d::Ref *pSender){   //what happens when a leve
     int levelNo =  (int)item->getTag();
     UserDefault::getInstance()->setIntegerForKey("LevelNo",levelNo-1);
    // auto scene = GameScene::createScene(levelNo-1);
+    
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    _eventDispatcher->removeAllEventListeners();
+    this->unscheduleUpdate();
     auto scene = GameScene::createScene();
     
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
