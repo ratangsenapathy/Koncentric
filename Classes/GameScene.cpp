@@ -76,7 +76,7 @@ void GameScene::loadScene()
     r=0;
     
     visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    origin = Director::getInstance()->getVisibleOrigin();
     
     
     
@@ -101,16 +101,16 @@ void GameScene::loadScene()
     
     
     //Setting the exit button
-    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",10);
+    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",15);
     exitButtonWidth=exitLabel->getContentSize().width;
     exitButtonHeight=exitLabel->getContentSize().height;
-    exitLabel->setPosition(Point(visibleSize.width-exitButtonWidth,visibleSize.height-exitButtonHeight));
+    exitLabel->setPosition(Point(visibleSize.width-exitButtonWidth+origin.x,visibleSize.height-exitButtonHeight+origin.y));
     this->addChild(exitLabel);
     
     
     //setting the clock
     timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",10);
-    timer->setPosition(Point(timer->getContentSize().width,visibleSize.height-timer->getContentSize().height));
+    timer->setPosition(Point(timer->getContentSize().width+origin.x,visibleSize.height-timer->getContentSize().height+origin.y));
     this->schedule(schedule_selector(GameScene::updateClock),1.0f);  //scedule to call upDateClock function every 1.0 sec
     this->addChild(timer);
     
@@ -119,11 +119,11 @@ void GameScene::loadScene()
     this->addChild(obstacleRotationPoint, 3);
     
     
-    float theta=0;
+    //float theta=0;
     
     snake[0] = DrawNode::create();
     snake[0]->drawDot(Vec2(0,0),ballRadius,ballColor);
-    theta+=2*M_PI/150;
+    //theta+=2*M_PI/150;
     //this->addChild(snake[0],2);
     
     rotationPoint->addChild(snake[0]);
@@ -262,9 +262,10 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
    // return true;
 
     if((touch->getLocation().x>=(visibleSize.width-2*exitButtonWidth)) && (touch->getLocation().y>=(visibleSize.height-1.5*exitButtonHeight)))
-    {
-        auto scene = MainMenuScene::createScene();
+    {           auto scene = MainMenuScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(2, scene));
+        //removeResources();
+
         return true;
     }
     if(controlable==1)  //  otherwise move ball inwards if controllable
@@ -334,6 +335,7 @@ void GameScene::updateClock(float dt)
 
     sprintf(timeText,"%s:%s",minuteText,secondText);
     timer->setString(timeText);
+    
 }
 
 //after a move into the next path or outside after collision the ball should be made controllab;e againa and speed adjusted
@@ -345,14 +347,14 @@ void GameScene::actionComplete()
        
         
         if(levelNo+1==noOfLevels)
-        {   _eventDispatcher->removeAllEventListeners();
+        {   //removeResources();
             auto scene = GameOverScene::createScene();
             Director::getInstance()->replaceScene(scene);
             return;
         }
         else{
             
-            _eventDispatcher->removeAllEventListeners();
+            
             //auto scene = GameScene::createScene(levelNo);
             //auto scene = GameScene::createScene();
             //Director::getInstance()->replaceScene(scene);
@@ -370,14 +372,15 @@ controlable=1;
 
 void GameScene::removeResources()
 {
+    timer->unschedule(schedule_selector(GameScene::updateClock));
     delete []obstacles;
-
+    if(schedule_selector(GameScene::updateClock))
     rotationPoint->removeAllChildrenWithCleanup(true);
     obstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
     //_eventDispatcher->removeAllEventListeners();
-    
+    _eventDispatcher->removeAllEventListeners();
     this->unscheduleUpdate();
 }
 
@@ -396,8 +399,8 @@ if(controlable==1){
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
 
- 		        Size visibleSize = Director::getInstance()->getVisibleSize();
-                Vec2 origin = Director::getInstance()->getVisibleOrigin();
+ 		        //Size visibleSize = Director::getInstance()->getVisibleSize();
+               // Vec2 origin = Director::getInstance()->getVisibleOrigin();
                 int originY=visibleSize.height/2+origin.y;
                 int snakeY=snakePosition.y;
                 int curTheta = (int)((acos((float)(snakePosition.x-rotationPoint->getPosition().x)/(float)distance))*180/M_PI);

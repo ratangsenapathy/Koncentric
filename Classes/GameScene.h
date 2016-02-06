@@ -20,6 +20,7 @@ public:
     
     virtual bool init();
     cocos2d::Size visibleSize;
+    cocos2d::Vec2 origin;
     cocos2d::DrawNode* goal;
     cocos2d::DrawNode* pathNode;
     cocos2d::DrawNode* snake[SNAKE_LENGTH];
@@ -37,6 +38,7 @@ public:
     int minuteCount=0;   //minute hand clock in the timer
     float obstacleSpeed=0;
     cocos2d::Label *timer;
+    int rIncrement;
     float distance;
     float theta=0;
     float ballTime;
