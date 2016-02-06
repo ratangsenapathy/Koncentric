@@ -440,7 +440,7 @@ if(controlable==1){
 		     // CCLOG("Bottom,Top: %f, %f",thetaone,thetatwo);
                int lower =((int)((obstacles[i].theta1)+rotationValue)) % 360;
                int upper =((int)((obstacles[i].theta2)+rotationValue)) % 360;
-		 if(curTheta>=lower && curTheta<=upper)       // check is collision occurs
+		 if((lower < upper && curTheta>=lower && curTheta<=upper) || (lower>=upper && ((curTheta>=lower && curTheta<=360) || curTheta<=upper)))       // check is collision occurs
                  {
                              controlable=0;
                          int diff= rMax - distance;
