@@ -55,26 +55,46 @@ bool OptionsScene::init()
     musicCheck->setPosition(Vec2(visibleSize.width/6+musicCheck->getContentSize().width/2+origin.x,
                             visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5+origin.y));
     musicCheck->addEventListener(CC_CALLBACK_2(OptionsScene::checkBoxSelectEvent,this));
-
+    musicCheck->setTag(0);
     
-    auto musicLabel = Label::createWithTTF("Music", "fonts/Marker Felt.ttf",musicCheck->getContentSize().height);
+    auto musicLabel = Label::createWithTTF(" Music", "fonts/Marker Felt.ttf",musicCheck->getContentSize().height);
     musicLabel->setPosition(Vec2(visibleSize.width/6+musicCheck->getContentSize().width+musicLabel->getContentSize().width/2+origin.x,
                                  visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5+origin.y));
+    
+    
+    auto soundsCheck = CheckBox::create("check_box_normal.png",
+                                       "check_box_normal_press.png",
+                                       "check_box_active.png",
+                                       "check_box_normal_disable.png",
+                                       "check_box_active_disable.png");
+    
+    soundsCheck->setPosition(Vec2(visibleSize.width/6+soundsCheck->getContentSize().width/2+origin.x,
+                                 visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5-musicCheck->getContentSize().height*2+origin.y));
+    
+    auto soundsLabel = Label::createWithTTF(" Sounds", "fonts/Marker Felt.ttf",soundsCheck->getContentSize().height);
+    soundsLabel->setPosition(Vec2(visibleSize.width/6+soundsCheck->getContentSize().width+soundsLabel->getContentSize().width/2+origin.x,
+                                 visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5-musicCheck->getContentSize().height*2+origin.y));
+    
+    soundsCheck->setTag(1);
+    
     auto menu = Menu::create(backItem,NULL);
     menu->setPosition(Point::ZERO);
     
     
     bool musicOn = UserDefault::getInstance()->getBoolForKey("MusicOn",true);
-    
+    bool soundsOn = UserDefault::getInstance()->getBoolForKey("SoundsOn", true);
     
         //musicCheck->setSelectedState(musicOn);
-        
+    soundsCheck->addEventListener(CC_CALLBACK_2(OptionsScene::checkBoxSelectEvent,this));
     musicCheck->setSelected(musicOn);
+    soundsCheck->setSelectedState(soundsOn);
     
     this->addChild(optionsTitle,1);
     this->addChild(menu,1);
     this->addChild(musicCheck,2);
     this->addChild(musicLabel,2);
+    this->addChild(soundsCheck,2);
+    this->addChild(soundsLabel,2);
     return true;
 }
 
@@ -89,16 +109,32 @@ void OptionsScene::goToMainMenuScene(cocos2d::Ref *sender){
 
 void OptionsScene::checkBoxSelectEvent(Ref *pSender, cocos2d::ui::CheckBox::EventType type)
 {
+    auto selectedCheckBox = (CheckBox*)pSender;
+    int tag=selectedCheckBox->getTag();
     switch (type)
     {
         case CheckBox::EventType::SELECTED:
-            UserDefault::getInstance()->setBoolForKey("MusicOn", true);
-            CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3");
+            if(tag==0)
+            {
+                UserDefault::getInstance()->setBoolForKey("MusicOn", true);
+                CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3");
+            }
+            else
+            {
+                 UserDefault::getInstance()->setBoolForKey("SoundsOn", true);
+            }
             break;
             
         case CheckBox::EventType::UNSELECTED:
-            UserDefault::getInstance()->setBoolForKey("MusicOn", false);
-            CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+            if(tag==0)
+            {
+                UserDefault::getInstance()->setBoolForKey("MusicOn", false);
+                CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+            }
+            else
+            {
+                UserDefault::getInstance()->setBoolForKey("SoundsOn", false);
+            }
             break;
             
         default:

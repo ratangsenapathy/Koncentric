@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "MainMenuScene.h"
 #include "GameOverScene.h"
+#include "SimpleAudioEngine.h"
 //#include "Levels.h"
 
 
@@ -300,7 +301,13 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
         distance-=rIncrement;
         auto rotateBy = RotateBy::create(ballTime,0);
         rotationPoint->runAction(RepeatForever::create(rotateBy));
-        
+        bool soundsOn = UserDefault::getInstance()->getBoolForKey("SoundsOn",true);
+        if(soundsOn)
+        {
+            CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("audio/moveInwards.mp3");
+            CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/moveInwards.mp3");
+        }
+            
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
         snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-rIncrement,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
@@ -449,6 +456,14 @@ if(controlable==1){
       rotationPoint->runAction(RepeatForever::create(rotateBy));
 
            //CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
+                     
+                     bool soundsOn = UserDefault::getInstance()->getBoolForKey("SoundsOn",true);
+                     if(soundsOn)
+                     {
+
+                         CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("audio/collision.mp3");
+                         CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/collision.mp3");
+                     }
                      snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
