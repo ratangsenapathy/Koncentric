@@ -17,6 +17,7 @@ public:
     
     CREATE_FUNC(LevelSelectScene);
     void Play(Ref *pSender);
+    void goBack(Ref *pSender);
     
 private:
     void goToGameScene(cocos2d::Ref *sender);

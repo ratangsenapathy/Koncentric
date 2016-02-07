@@ -1,6 +1,7 @@
 #include "LevelSelectScene.h"
 #include "GameScene.h"
 #include "Definitions.h"
+#include "MainMenuScene.h"
 #include "ui/CocosGUI.h"
 
 USING_NS_CC;
@@ -70,9 +71,17 @@ bool LevelSelectScene::init()
     auto levelSelectLabel = Label::createWithTTF("Select a Level","fonts/Marker Felt.ttf",36);
     levelSelectLabel->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*15/16));
     
+    
+    auto backItem = MenuItemFont::create("Back",CC_CALLBACK_1(LevelSelectScene::goBack,this));
+    //backItem->setColor(cocos2d::Color3B::BLUE);
+    backItem->setScale(1);
+    backItem->setPosition(Point(visibleSize.width+origin.x-backItem->getContentSize().width/2, visibleSize.height+origin.y- backItem->getContentSize().height/2));
+    
+
+    
     levelSelectLabel->setColor(cocos2d::Color3B::BLUE);
     auto *menu = Menu::create();  //menu creation
-    
+    auto *menu2= Menu::create(backItem,NULL);
     float height_factor = 0.5;
     int width_factor = 1;
     for(int i=1;i<=LEVEL_COUNT;i++)  // loop to position menu items depending on scroll view container size and various macros
@@ -90,9 +99,11 @@ bool LevelSelectScene::init()
         if (i%5==0){height_factor++; width_factor=1;}
         
     }
-    menu->setPosition(Point(0,0));          //position menu
+    menu->setPosition(Point::ZERO);          //position menu
+    menu2->setPosition(Point::ZERO);
     this->addChild(levelSelectLabel);     //add items to parents
     scrollView->addChild(menu);
+    this->addChild(menu2);
     this->addChild(scrollView);
     
     
@@ -114,9 +125,17 @@ void LevelSelectScene::Play(cocos2d::Ref *pSender){   //what happens when a leve
     Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
   
 }
+void LevelSelectScene::goBack(cocos2d::Ref *pSender)
+{
+    this->removeAllChildrenWithCleanup(true);
+    Director::getInstance()->getTextureCache()->removeUnusedTextures();
+    _eventDispatcher->removeAllEventListeners();
+    auto scene=MainMenuScene::createScene();
+    Director::getInstance()->replaceScene(scene);
+}
 
 void LevelSelectScene::goToGameScene(cocos2d::Ref *sender){
  //   auto scene = GameScene::createScene(0);
- //   Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
+ //   Director::getInstance()->replaceScene(scene);
 
 }
