@@ -2,7 +2,7 @@
 #define __OPTIONS_SCENE_H__
 
 #include "cocos2d.h"
-#include <UICheckBox.h>
+#include <ui/UICheckBox.h>
 
 class OptionsScene : public cocos2d::Layer
 {
