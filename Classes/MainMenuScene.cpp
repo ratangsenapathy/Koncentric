@@ -2,6 +2,7 @@
 #include "LevelSelectScene.h"
 #include "OptionsScene.h"
 #include "Definitions.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -32,9 +33,21 @@ bool MainMenuScene::init()
     
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    bool musicOn = UserDefault::getInstance()->getBoolForKey("MusicOn",true);
     
+    if(!CocosDenshion::SimpleAudioEngine::getInstance()->isBackgroundMusicPlaying())
+    {
+    CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("audio/Fantasy Armies.mp3");
+    CocosDenshion::SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.5);
+        CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+    if(musicOn)
+    {
+        
+        CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3",true);
+    }
+    }
     auto gameTitle = Label::createWithTTF("Koncentric", "fonts/Marker Felt.ttf", 100);
-    gameTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*0.8+origin.y));
+    gameTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*0.9+origin.y));
     gameTitle->setColor(Color3B(100,25, 200));
     
     auto playItem = MenuItemFont::create("Play",CC_CALLBACK_1(MainMenuScene::goToGameScene,this));

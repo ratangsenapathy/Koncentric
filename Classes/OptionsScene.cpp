@@ -1,6 +1,7 @@
 #include "OptionsScene.h"
 #include "Definitions.h"
-#include <UICheckBox.h>
+#include "SimpleAudioEngine.h"
+
 USING_NS_CC;
 
 using namespace cocos2d::ui;
@@ -34,7 +35,7 @@ bool OptionsScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
     auto optionsTitle = Label::createWithTTF("Options", "fonts/Marker Felt.ttf", 80);
-    optionsTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*0.8+origin.y));
+    optionsTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*0.9+origin.y));
     optionsTitle->setColor(Color3B(100,25, 200));
     //this->setKeypadEnabled(true);
     
@@ -45,21 +46,35 @@ bool OptionsScene::init()
     
     backItem->setTag(0);
     
-    auto music = CheckBox::create("check_box_normal.png",
+    auto musicCheck = CheckBox::create("check_box_normal.png",
                                      "check_box_normal_press.png",
                                      "check_box_active.png",
                                      "check_box_normal_disable.png",
                                      "check_box_active_disable.png");
  
-    music->setPosition(Vec2(music->getContentSize().width/2+origin.x,visibleSize.height*0.8-optionsTitle->getContentSize().height*1.5+origin.y));
+    musicCheck->setPosition(Vec2(visibleSize.width/6+musicCheck->getContentSize().width/2+origin.x,
+                            visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5+origin.y));
+    musicCheck->addEventListener(CC_CALLBACK_2(OptionsScene::checkBoxSelectEvent,this));
+
     
+    auto musicLabel = Label::createWithTTF("Music", "fonts/Marker Felt.ttf",musicCheck->getContentSize().height);
+    musicLabel->setPosition(Vec2(visibleSize.width/6+musicCheck->getContentSize().width+musicLabel->getContentSize().width/2+origin.x,
+                                 visibleSize.height*0.9-optionsTitle->getContentSize().height*1.5+origin.y));
     auto menu = Menu::create(backItem,NULL);
     menu->setPosition(Point::ZERO);
     
     
+    bool musicOn = UserDefault::getInstance()->getBoolForKey("MusicOn",true);
+    
+    
+        //musicCheck->setSelectedState(musicOn);
+        
+    musicCheck->setSelected(musicOn);
+    
     this->addChild(optionsTitle,1);
     this->addChild(menu,1);
-    this->addChild(music,2);
+    this->addChild(musicCheck,2);
+    this->addChild(musicLabel,2);
     return true;
 }
 
@@ -72,3 +87,21 @@ void OptionsScene::goToMainMenuScene(cocos2d::Ref *sender){
     Director::getInstance()->popScene();
 }
 
+void OptionsScene::checkBoxSelectEvent(Ref *pSender, cocos2d::ui::CheckBox::EventType type)
+{
+    switch (type)
+    {
+        case CheckBox::EventType::SELECTED:
+            UserDefault::getInstance()->setBoolForKey("MusicOn", true);
+            CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3");
+            break;
+            
+        case CheckBox::EventType::UNSELECTED:
+            UserDefault::getInstance()->setBoolForKey("MusicOn", false);
+            CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+            break;
+            
+        default:
+            break;
+    }
+}

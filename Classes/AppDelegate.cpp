@@ -1,6 +1,6 @@
 #include "AppDelegate.h"
 #include "SplashScene.h"
-
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 
@@ -94,7 +94,7 @@ void AppDelegate::applicationDidEnterBackground() {
     Director::getInstance()->stopAnimation();
     
     // if you use SimpleAudioEngine, it must be pause
-    // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+     CocosDenshion::SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
@@ -102,5 +102,5 @@ void AppDelegate::applicationWillEnterForeground() {
     Director::getInstance()->startAnimation();
     
     // if you use SimpleAudioEngine, it must resume here
-    // SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+     CocosDenshion::SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }
