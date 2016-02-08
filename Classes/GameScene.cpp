@@ -16,8 +16,10 @@ GameScene::~GameScene()
 {
   
     delete []obstacles;
+    delete ringSpin;
     rotationPoint->removeAllChildrenWithCleanup(true);
-    obstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    clockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    antiClockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
     //_eventDispatcher->removeAllEventListeners();
@@ -59,7 +61,7 @@ bool GameScene::init()
     levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
-    rIncrement=visibleSize.width/25;
+    rIncrement=visibleSize.width/20;
     generateJSON(jsonFile);
     
     loadScene();
@@ -104,7 +106,7 @@ void GameScene::loadScene()
     
     
     //Setting the exit button
-    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",16);
+    auto exitLabel = Label::createWithTTF("Exit","fonts/Marker Felt.ttf",32);
     exitButtonWidth=exitLabel->getContentSize().width;
     exitButtonHeight=exitLabel->getContentSize().height;
     exitLabel->setPosition(Point(visibleSize.width-exitButtonWidth+origin.x,visibleSize.height-exitButtonHeight+origin.y));
@@ -112,7 +114,7 @@ void GameScene::loadScene()
     
     
     //setting the clock
-    timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",16);
+    timer = Label::createWithTTF("00:00","fonts/Marker Felt.ttf",32);
     timer->setPosition(Point(timer->getContentSize().width+origin.x,visibleSize.height-timer->getContentSize().height+origin.y));
     this->schedule(schedule_selector(GameScene::updateClock),1.0f);  //scedule to call upDateClock function every 1.0 sec
     this->addChild(timer);
@@ -131,18 +133,20 @@ void GameScene::loadScene()
     {
         sprintf(bestTimeText, "Best Time=%s",getTimeText(bestMin, bestSec).c_str());
     }
-    auto bestTimeLabel = Label::createWithTTF(bestTimeText,"fonts/Marker Felt.ttf",16);
+    auto bestTimeLabel = Label::createWithTTF(bestTimeText,"fonts/Marker Felt.ttf",32);
     float bestTimeWidth=bestTimeLabel->getContentSize().width;
     float bestTimeHeight=bestTimeLabel->getContentSize().height;
     bestTimeLabel->setPosition(Point(bestTimeWidth/2+origin.x,visibleSize.height-bestTimeHeight-timer->getContentSize().height-3+origin.y));
 
     this->addChild(bestTimeLabel);
     
-    obstacleRotationPoint = Node::create();
-    obstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
-    this->addChild(obstacleRotationPoint, 3);
+    clockwiseObstacleRotationPoint = Node::create();
+    clockwiseObstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
+    this->addChild(clockwiseObstacleRotationPoint, 3);
     
-    
+    antiClockwiseObstacleRotationPoint = Node::create();
+    antiClockwiseObstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
+    this->addChild(antiClockwiseObstacleRotationPoint, 3);
     //float theta=0;
     
     snake[0] = DrawNode::create();
@@ -198,7 +202,10 @@ void GameScene::loadScene()
         DrawNode* polygon = DrawNode::create();
         
         polygon->drawPolygon(vertices,index, obstacleColor, 1, obstacleColor);
-        obstacleRotationPoint->addChild(polygon);
+        if(ringSpin[obstacles[i].ringNum] == 1)
+        antiClockwiseObstacleRotationPoint->addChild(polygon);
+        else
+        clockwiseObstacleRotationPoint->addChild(polygon);
         lower =upper;
         
         delete []vertices;
@@ -215,7 +222,8 @@ void GameScene::loadScene()
     // rotationPoint->runAction(RepeatForever::create(rotateBy));
     
     auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
-    obstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
+    antiClockwiseObstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
+    clockwiseObstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate->reverse()));
     
     controlable=0;
     this->scheduleUpdate();
@@ -242,6 +250,14 @@ void GameScene::parseJSON()
         ringColor = convertHexToRBG(jsonLevels[(SizeType)levelNo]["ringColor"].GetString());
         std::string hexString = jsonLevels[(SizeType)levelNo]["ball"]["color"].GetString();
         goalColor = convertHexToRBG(jsonLevels[(SizeType)levelNo]["goalColor"].GetString());
+        const rapidjson::Value& ringSpinsJSON = jsonLevels[(SizeType)levelNo]["ringSpin"];
+        ringSpin = new int[ringSpinsJSON.Size()];
+        
+        for(int i=0;i<ringSpinsJSON.Size();i++)
+        {
+            ringSpin[i]=ringSpinsJSON[i].GetInt();
+        }
+        
         ballColor = convertHexToRBG(hexString);
         ballDirection = jsonLevels[(SizeType)levelNo]["ball"]["direction"].GetInt();
         ballInitTheta = jsonLevels[(SizeType)levelNo]["ball"]["initTheta"].GetDouble();
@@ -408,9 +424,10 @@ void GameScene::removeResources()
 {
     timer->unschedule(schedule_selector(GameScene::updateClock));
     delete []obstacles;
-    
+    delete ringSpin;
     rotationPoint->removeAllChildrenWithCleanup(true);
-    obstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    clockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    antiClockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
     //_eventDispatcher->removeAllEventListeners();
@@ -421,10 +438,12 @@ void GameScene::removeResources()
 //function updates every frame
 void GameScene::update(float dt){
  Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
-    int rotationValue = (360-(int)(obstacleRotationPoint->getRotation()) % 360);
-    rotationValue=rotationValue==360?0:rotationValue;
-    
-  //  CCLOG("%d",360-(int)(obstacleRotationPoint->getRotation()) % 360);
+    int clockwiseRotationValue = (360-(int)(clockwiseObstacleRotationPoint->getRotation()) % 360);
+    int antiClockwiseRotationValue = (360-(int)(antiClockwiseObstacleRotationPoint->getRotation()) % 360);
+    clockwiseRotationValue=clockwiseRotationValue==360?0:clockwiseRotationValue;
+    antiClockwiseRotationValue=antiClockwiseRotationValue==360?0:antiClockwiseRotationValue;
+    int rotationValue=0;
+  //  CCLOG("%d",360-(int)(clockwiseObstacleRotationPoint->getRotation()) % 360);
 //CCLOG("Position=%f,%f",snakePosition1.x,snakePosition1.y);
 if(controlable==1){
   for(int i=0;i<obstacleCount;i++)
@@ -432,7 +451,10 @@ if(controlable==1){
          if(obstacles[i].ringNum*rIncrement==distance || obstacles[i].ringNum*rIncrement+rIncrement==distance)
            {
                       Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
-
+               if(ringSpin[obstacles[i].ringNum] == 1)
+                   rotationValue=antiClockwiseRotationValue;
+               else
+                   rotationValue=clockwiseRotationValue;
  		        //Size visibleSize = Director::getInstance()->getVisibleSize();
                // Vec2 origin = Director::getInstance()->getVisibleOrigin();
                 int originY=visibleSize.height/2+origin.y;

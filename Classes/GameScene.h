@@ -25,7 +25,8 @@ public:
     cocos2d::DrawNode* pathNode;
     cocos2d::DrawNode* snake[SNAKE_LENGTH];
     cocos2d::Node* rotationPoint;
-    cocos2d::Node* obstacleRotationPoint;
+    cocos2d::Node* clockwiseObstacleRotationPoint;
+    cocos2d::Node* antiClockwiseObstacleRotationPoint;
     cocos2d::DrawNode* blocks;
     struct obstacle *obstacles;
     int noOfLevels;
@@ -33,7 +34,7 @@ public:
     int levelNo=0;
     int controlable=0;      // flag to check if user can controll the ball or not
     int rMax=0;             // max radius of circle
-
+    int *ringSpin;
     int secondCount=0;    // second han value in the timer
     int minuteCount=0;   //minute hand clock in the timer
     float obstacleSpeed=0;

@@ -92,7 +92,7 @@ bool LevelSelectScene::init()
         std::string levNo = stream.str();
         auto menu_item =MenuItemFont::create(levNo,CC_CALLBACK_1(LevelSelectScene::Play,this));
         menu_item->setTag(i);
-        
+        menu_item->setScale(2);
         menu_item->setPosition(Point((containerSize.width/6)* width_factor, containerSize.height - height_factor/HEIGHT_DIVISION_FACTOR * containerSize.height));
         menu->addChild(menu_item);
         width_factor++;

@@ -11,8 +11,9 @@
 	    },
 	    
 	    "numOfRings"  : 6,
+        "ringSpin"    : [1,-1,1,-1,1,-1],
         "ringColor"   : "#0000FF",
-        "obstacleSpeed" : 10,
+        "obstacleSpeed" : 30,
 	    "goalColor"     : "#F00000",
                 
 	    "obstacles": [
@@ -62,8 +63,9 @@
 	    },
 	    
 	    "numOfRings"  : 6,
+        "ringSpin"    : [1,-1,1,-1,1,-1],
         "ringColor"   : "#AF07F4",
-        "obstacleSpeed" : 10,
+        "obstacleSpeed" : 30,
 	    "goalColor"     : "#DDFF00",
                 
 	    "obstacles": [
@@ -118,8 +120,9 @@
 	    },
 	
         "numOfRings"  : 7,
+        "ringSpin"    : [1,-1,1,-1,1,-1],
         "ringColor"   : "#EEA03DF",
-        "obstacleSpeed" : 10,
+        "obstacleSpeed" : 30,
         "goalColor"     : "#DD0000",
 	
 	    "obstacles": [
@@ -188,8 +191,9 @@
         },
             
         "numOfRings"  : 7,
+        "ringSpin"    : [1,-1,1,-1,1,-1],
         "ringColor"   : "#0FB0AF",
-        "obstacleSpeed" : 10,
+        "obstacleSpeed" : 30,
         "goalColor"     : "#DD0000",
         
         "obstacles": [
@@ -258,8 +262,9 @@
                 },
                 
                 "numOfRings"  : 7,
+                "ringSpin"    : [1,-1,1,-1,1,-1],
                 "ringColor"   : "#DF99Fa",
-                "obstacleSpeed" : 10,
+                "obstacleSpeed" : 30,
                 "goalColor"     : "#DD0FE0",
                 
                 "obstacles": [
