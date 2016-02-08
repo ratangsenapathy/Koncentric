@@ -17,6 +17,7 @@ GameScene::~GameScene()
   
     delete []obstacles;
     delete ringSpin;
+    this->unschedule(schedule_selector(GameScene::changeObstacleDirection));
     rotationPoint->removeAllChildrenWithCleanup(true);
     clockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
     antiClockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
@@ -118,6 +119,9 @@ void GameScene::loadScene()
     timer->setPosition(Point(timer->getContentSize().width+origin.x,visibleSize.height-timer->getContentSize().height+origin.y));
     this->schedule(schedule_selector(GameScene::updateClock),1.0f);  //scedule to call upDateClock function every 1.0 sec
     this->addChild(timer);
+    
+    if(spinSwitchTime!=0)
+        this->schedule(schedule_selector(GameScene::changeObstacleDirection),spinSwitchTime);
     
     char minKey[15],secKey[15];
     char bestTimeText[15];
@@ -222,8 +226,13 @@ void GameScene::loadScene()
     // rotationPoint->runAction(RepeatForever::create(rotateBy));
     
     auto obstacleRotate = RotateBy::create(0.5f,obstacleSpeed*-1);
-    antiClockwiseObstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate));
-    clockwiseObstacleRotationPoint->runAction(RepeatForever::create(obstacleRotate->reverse()));
+    auto clockwiseAction = RepeatForever::create(obstacleRotate->reverse());
+    auto antiClockwiseAction = RepeatForever::create(obstacleRotate);
+
+    antiClockwiseAction->setTag(0);
+    clockwiseAction->setTag(0);
+        antiClockwiseObstacleRotationPoint->runAction(antiClockwiseAction);
+    clockwiseObstacleRotationPoint->runAction(clockwiseAction);
     
     controlable=0;
     this->scheduleUpdate();
@@ -252,6 +261,8 @@ void GameScene::parseJSON()
         goalColor = convertHexToRBG(jsonLevels[(SizeType)levelNo]["goalColor"].GetString());
         const rapidjson::Value& ringSpinsJSON = jsonLevels[(SizeType)levelNo]["ringSpin"];
         ringSpin = new int[ringSpinsJSON.Size()];
+        spinSwitchTime = jsonLevels[(SizeType)levelNo]["spinSwitchTime"].GetDouble();
+        
         
         for(int i=0;i<ringSpinsJSON.Size();i++)
         {
@@ -423,6 +434,7 @@ controlable=1;
 void GameScene::removeResources()
 {
     timer->unschedule(schedule_selector(GameScene::updateClock));
+    this->unschedule(schedule_selector(GameScene::changeObstacleDirection));
     delete []obstacles;
     delete ringSpin;
     rotationPoint->removeAllChildrenWithCleanup(true);
@@ -517,6 +529,18 @@ std::string GameScene::getTimeText(int minCount, int secCount)
      sprintf(timeText,"%s:%s",minuteText,secondText);
     return timeText;
     
+}
+
+void GameScene::changeObstacleDirection(float dt)
+{
+    auto antiClockwiseAction = antiClockwiseObstacleRotationPoint->getActionByTag(0)->clone();
+    antiClockwiseAction->setTag(0);
+    auto clockwiseAction = clockwiseObstacleRotationPoint->getActionByTag(0)->clone();
+    clockwiseAction->setTag(0);
+    clockwiseObstacleRotationPoint->stopAllActions();
+    antiClockwiseObstacleRotationPoint->stopAllActions();
+    clockwiseObstacleRotationPoint->runAction(antiClockwiseAction);
+    antiClockwiseObstacleRotationPoint->runAction(clockwiseAction);
 }
 
 void GameScene::saveScores()

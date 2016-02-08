@@ -45,6 +45,7 @@ public:
     float ballTime;
     float ballRadius;
     float ballInitTheta;
+    float spinSwitchTime;
     int exitButtonWidth;
     int exitButtonHeight;
     int ballDirection;
@@ -77,6 +78,7 @@ public:
     void generateJSON(std::string jsonFile);
     void parseJSON();
     void saveScores();
+    void changeObstacleDirection(float dt);
     std::string getTimeText(int minCount,int secCount);
     ~GameScene();
     
