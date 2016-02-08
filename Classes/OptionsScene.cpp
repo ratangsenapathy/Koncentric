@@ -117,7 +117,7 @@ void OptionsScene::checkBoxSelectEvent(Ref *pSender, cocos2d::ui::CheckBox::Even
             if(tag==0)
             {
                 UserDefault::getInstance()->setBoolForKey("MusicOn", true);
-                CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3");
+                CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("audio/Fantasy Armies.mp3",true);
             }
             else
             {

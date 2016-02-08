@@ -4,8 +4,8 @@
 	{
 	    "ball" : {
 		"color"       : "#FF0000",
-		"speed"       : 8,
-		"radius"      : 3,
+		"speed"       : 12,
+		"radius"      : 6,
 		"initTheta"   : 0,
 		"direction"   : 1
 	    },
@@ -56,8 +56,8 @@
 	{
 	    "ball" : {
 		"color"       : "#0000FF",
-		"speed"       : 9,
-		"radius"      : 3,
+		"speed"       : 15,
+		"radius"      : 6,
 		"initTheta"   : 0,
 		"direction"   : 1
 	    },
@@ -113,14 +113,14 @@
 	{
         "ball" : {
 		"color"       : "#00ff00",
-		"speed"       : 10,
-		"radius"      : 3,
+		"speed"       : 18,
+		"radius"      : 6,
 		"initTheta"   : 90,
 		"direction"   : 1
 	    },
 	
         "numOfRings"  : 7,
-        "ringSpin"    : [1,-1,1,-1,1,-1],
+        "ringSpin"    : [1,-1,1,-1,1,-1,1],
         "ringColor"   : "#EEA03DF",
         "obstacleSpeed" : 30,
         "goalColor"     : "#DD0000",
@@ -184,14 +184,14 @@
     {
         "ball" : {
         "color"       : "#ff0000",
-        "speed"       : 18,
-        "radius"      : 3,
+        "speed"       : 21,
+        "radius"      : 6,
         "initTheta"   : 0,
         "direction"   : 1
         },
             
         "numOfRings"  : 7,
-        "ringSpin"    : [1,-1,1,-1,1,-1],
+        "ringSpin"    : [1,-1,1,-1,1,-1,1],
         "ringColor"   : "#0FB0AF",
         "obstacleSpeed" : 30,
         "goalColor"     : "#DD0000",
@@ -255,16 +255,16 @@
                 {
                 "ball" : {
                 "color"       : "#ffa0e0",
-                "speed"       : 10,
-                "radius"      : 3,
+                "speed"       : 24,
+                "radius"      : 6,
                 "initTheta"   : 90,
                 "direction"   : 1
                 },
                 
                 "numOfRings"  : 7,
-                "ringSpin"    : [1,-1,1,-1,1,-1],
+                "ringSpin"    : [1,-1,1,-1,1,-1,1],
                 "ringColor"   : "#DF99Fa",
-                "obstacleSpeed" : 30,
+                "obstacleSpeed" : 40,
                 "goalColor"     : "#DD0FE0",
                 
                 "obstacles": [
