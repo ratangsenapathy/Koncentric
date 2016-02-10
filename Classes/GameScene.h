@@ -3,6 +3,7 @@
 #include "Definitions.h"
 #include "rapidjson/document.h"
 #include "cocos2d.h"
+#include "ui/CocosGUI.h"
 //#include "CCVector.h"
 
 class GameScene : public cocos2d::Layer
@@ -28,6 +29,7 @@ public:
     cocos2d::Node* clockwiseObstacleRotationPoint;
     cocos2d::Node* antiClockwiseObstacleRotationPoint;
     cocos2d::DrawNode* blocks;
+    cocos2d::ui::Layout* layout;
     struct obstacle *obstacles;
     int noOfLevels;
     int r=0;
@@ -39,6 +41,7 @@ public:
     int minuteCount=0;   //minute hand clock in the timer
     float obstacleSpeed=0;
     cocos2d::Label *timer;
+    bool timerRunning;
     int rIncrement;
     float distance;
     float theta=0;
@@ -80,6 +83,8 @@ public:
     void saveScores();
     void changeObstacleDirection(float dt);
     std::string getTimeText(int minCount,int secCount);
+    void displayLevelCompleteLayer();
+    void goToNextLevel(cocos2d::Ref *pSender);
     ~GameScene();
     
     

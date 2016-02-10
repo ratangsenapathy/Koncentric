@@ -2,7 +2,7 @@
 #include "MainMenuScene.h"
 #include "GameOverScene.h"
 #include "SimpleAudioEngine.h"
-#include "ui/CocosGUI.h"
+
 //#include "Levels.h"
 
 
@@ -15,9 +15,10 @@ using namespace rapidjson;
 
 GameScene::~GameScene()
 {
-  
+   
     delete []obstacles;
-    delete ringSpin;
+    delete []ringSpin;
+    
     this->unschedule(schedule_selector(GameScene::changeObstacleDirection));
     rotationPoint->removeAllChildrenWithCleanup(true);
     clockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
@@ -76,7 +77,7 @@ void GameScene::loadScene()
     
     
     //obstacleSpeed =10;
-    
+    timerRunning=true;
     secondCount=0; minuteCount=0;
     theta=0;
     controlable=0;
@@ -374,6 +375,8 @@ void GameScene::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
 //function to update the clock
 void GameScene::updateClock(float dt)
 {
+    if(timerRunning)
+    {
     secondCount++;
     if(secondCount == 60) {secondCount=0; minuteCount++;}
    // std::stringstream stream;
@@ -397,7 +400,7 @@ void GameScene::updateClock(float dt)
     sprintf(timeText,"%s:%s",minuteText,secondText);*/
     std::string timeText=getTimeText(minuteCount, secondCount);
     timer->setString(timeText);
-    
+    }
 }
 
 //after a move into the next path or outside after collision the ball should be made controllab;e againa and speed adjusted
@@ -414,46 +417,67 @@ void GameScene::actionComplete()
             Director::getInstance()->replaceScene(scene);
             return;
         }
-        else{
+        else
+        {
             
             
             //auto scene = GameScene::createScene(levelNo);
             //auto scene = GameScene::createScene();
             //Director::getInstance()->replaceScene(scene);
-         //   ui::Layout* layout = ui::Layout::create();
-           /* layout->setLayoutType(ui::Layout::Type::HORIZONTAL);
-            layout->setContentSize(Size(280, 150));
-            layout->setPosition(Vec2(origin.x + 100, origin.y + visibleSize.height - 100));
-            layout->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
-            layout->setBackGroundColor(Color3B::BLUE);
-            addChild(layout);
-            
-        */
-        //    layout->addChild(button_TopLeft);
-            
-
-            //return;
-            removeResources();
-            UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
-            parseJSON();
-            loadScene();
+            displayLevelCompleteLayer();
+           
             return;
-        }
+            }
     }
-         auto rotateBy = RotateBy::create(ballTime,360/distance);
+    auto rotateBy = RotateBy::create(ballTime,360/distance);
     rotationPoint->runAction(RepeatForever::create(rotateBy));
 controlable=1;
 }
 
+void GameScene::displayLevelCompleteLayer()
+{  timerRunning=false;
+    layout = ui::Layout::create();
+    layout->setLayoutType(ui::Layout::Type::HORIZONTAL);
+    layout->setContentSize(Size(visibleSize.width*0.8,visibleSize.height/3));
+    layout->setPosition(Vec2(origin.x + visibleSize.width/2-layout->getContentSize().width/2, origin.y + visibleSize.height/2-layout->getContentSize().height/2));
+    layout->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
+    layout->setOpacity(100);
+    layout->setBackGroundColor(Color3B(50, 50, 50));
+     this->addChild(layout,4);
+    
+    auto congratsLabel = Label::createWithTTF("You cleared the level", "fonts/Marker Felt.ttf", 50);
+    congratsLabel->setColor(Color3B::GREEN);
+    congratsLabel->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height*0.8));
+    
+    auto goToNextLevelItem = MenuItemFont::create("Next", CC_CALLBACK_1(GameScene::goToNextLevel,this));
+    goToNextLevelItem->setColor(Color3B(0, 0, 255));
+    goToNextLevelItem->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height/2));
+    auto menu = Menu::create(goToNextLevelItem,NULL);
+    menu->setPosition(Point::ZERO);
+    layout->addChild(congratsLabel);
+    layout->addChild(menu);
+}
+
+void GameScene::goToNextLevel(cocos2d::Ref *pSender)
+{
+    removeResources();
+    
+    UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
+    parseJSON();
+    loadScene();
+}
+
 void GameScene::removeResources()
 {
+    layout->removeAllChildrenWithCleanup(true);
     timer->unschedule(schedule_selector(GameScene::updateClock));
     this->unschedule(schedule_selector(GameScene::changeObstacleDirection));
     delete []obstacles;
-    delete ringSpin;
+    delete []ringSpin;
     rotationPoint->removeAllChildrenWithCleanup(true);
     clockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
     antiClockwiseObstacleRotationPoint->removeAllChildrenWithCleanup(true);
+    
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
     //_eventDispatcher->removeAllEventListeners();
