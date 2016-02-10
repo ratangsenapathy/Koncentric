@@ -2,6 +2,7 @@
 #include "MainMenuScene.h"
 #include "GameOverScene.h"
 #include "SimpleAudioEngine.h"
+#include "ui/CocosGUI.h"
 //#include "Levels.h"
 
 
@@ -35,7 +36,7 @@ Scene* GameScene::createScene()
    
     
     // 'layer' is an autorelease object
-    
+
     auto layer = GameScene::create();
 
     // add layer as a child to scene
@@ -62,7 +63,7 @@ bool GameScene::init()
     levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
-    rIncrement=visibleSize.width/20;
+    rIncrement=visibleSize.width/24;
     generateJSON(jsonFile);
     
     loadScene();
@@ -419,6 +420,19 @@ void GameScene::actionComplete()
             //auto scene = GameScene::createScene(levelNo);
             //auto scene = GameScene::createScene();
             //Director::getInstance()->replaceScene(scene);
+         //   ui::Layout* layout = ui::Layout::create();
+           /* layout->setLayoutType(ui::Layout::Type::HORIZONTAL);
+            layout->setContentSize(Size(280, 150));
+            layout->setPosition(Vec2(origin.x + 100, origin.y + visibleSize.height - 100));
+            layout->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
+            layout->setBackGroundColor(Color3B::BLUE);
+            addChild(layout);
+            
+        */
+        //    layout->addChild(button_TopLeft);
+            
+
+            //return;
             removeResources();
             UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
             parseJSON();
