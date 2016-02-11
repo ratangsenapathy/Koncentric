@@ -24,7 +24,8 @@ public:
     cocos2d::Vec2 origin;
     cocos2d::DrawNode* goal;
     cocos2d::DrawNode* pathNode;
-    cocos2d::DrawNode* snake[SNAKE_LENGTH];
+    //cocos2d::DrawNode* ball;
+    cocos2d::ParticleSystemQuad* ball;
     cocos2d::Node* rotationPoint;
     cocos2d::Node* clockwiseObstacleRotationPoint;
     cocos2d::Node* antiClockwiseObstacleRotationPoint;

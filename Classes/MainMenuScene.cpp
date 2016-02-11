@@ -62,8 +62,20 @@ bool MainMenuScene::init()
     optionItem->setPosition(Point(visibleSize.width/2+origin.x, visibleSize.height*0.6-playItem->getContentSize().height*2+origin.y));
     optionItem->setTag(1);
     
+    ParticleSystemQuad* m_emitter = new ParticleSystemQuad();
+    m_emitter = ParticleFlower::create();
+    m_emitter->setEmissionRate(20);
+    m_emitter->setSpeed(150);
+   // m_emitter->setColor(Color3B(50, 100, 200));
+    m_emitter->setStartColor(Color4F(0, 180, 200, 255));
+    m_emitter->setPosition(Vec2(visibleSize.width/2+origin.x,visibleSize.height*0.55+origin.y));
+    //m_emitter->setGravity(Vec2(0,-90));
+    // = kCCParticleModeGravity
+    //m_emitter->modeA.gravity = ccp(0,-90);
+    
     auto menu = Menu::create(playItem,optionItem,NULL);
     menu->setPosition(Point::ZERO);
+    this->addChild(m_emitter);
     this->addChild(gameTitle);
     this->addChild(menu);
     

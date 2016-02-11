@@ -64,8 +64,9 @@ bool GameScene::init()
     levelNo = UserDefault::getInstance()->getIntegerForKey("LevelNo");
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
-    rIncrement=visibleSize.width/24;
+    rIncrement=visibleSize.width/20;
     generateJSON(jsonFile);
+    
     
     loadScene();
     
@@ -98,10 +99,37 @@ void GameScene::loadScene()
     
 #endif
     
+    ParticleSystemQuad* m_emitter = new ParticleSystemQuad();
+    m_emitter = ParticleSnow::create();
+    m_emitter->setEmissionRate(25);
+    m_emitter->setSpeed(180);
+    //m_emitter->setLifeVar(0);
+    CCLOG("%f",m_emitter->getDuration());
+    // m_emitter->setColor(Color3B(50, 100, 200));
+    m_emitter->setStartColor(Color4F(0, 0, 255, 255));
+    m_emitter->setPosition(Vec2(origin.x+visibleSize.width/2,visibleSize.height+origin.y));
+    //  m_emitter->setGravity(Vec2(0,0));
+    this->addChild(m_emitter);
+
+    ParticleSystemQuad* m_emitter2 = new ParticleSystemQuad();
+    m_emitter2 = ParticleGalaxy::create();
+       m_emitter2->setEmissionRate(200);
+   
+    m_emitter2->setStartSize(1.5*5*M_PI);
+    m_emitter2->setStartSizeVar(0);
+    m_emitter2->setEndSize(1.5*5*M_PI);
+    m_emitter2->setEndSizeVar(0);
+    m_emitter2->setLife(1);
+    m_emitter2->setLife(0);
+    m_emitter2->setStartColor(goalColor);
+    m_emitter2->setPosition(Vec2(origin.x+visibleSize.width/2,visibleSize.height/2+origin.y));
+    //  m_emitter->setGravity(Vec2(0,0));
+    this->addChild(m_emitter2);
+    /*
     goal = DrawNode::create();
     goal->drawDot(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y), 5, goalColor);
     this->addChild(goal,1);          // drawing the goal
-    
+    */
     
     rotationPoint = Node::create();
     rotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
@@ -154,13 +182,25 @@ void GameScene::loadScene()
     antiClockwiseObstacleRotationPoint->setPosition(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y);
     this->addChild(antiClockwiseObstacleRotationPoint, 3);
     //float theta=0;
+    /*
+    ball = DrawNode::create();
+    ball->drawDot(Vec2(0,0),ballRadius,ballColor);
+    */
+    ball = new ParticleSystemQuad();
+    ball = ParticleMeteor::create();
+    ball->setEmissionRate(100);
+    ball->setSpeedVar(0);
     
-    snake[0] = DrawNode::create();
-    snake[0]->drawDot(Vec2(0,0),ballRadius,ballColor);
+    ball->setSpeed(50);
+    ball->setStartColor(ballColor);
+    ball->setStartSize(1.3*M_PI*ballRadius);
+    ball->setStartSizeVar(0);
+    ball->setPosition(Vec2(0,0));
+    
     //theta+=2*M_PI/rIncrement0;
     //this->addChild(snake[0],2);
     
-    rotationPoint->addChild(snake[0]);
+    rotationPoint->addChild(ball);
     // fixedPoint->addChild(snake[0]);
     
     
@@ -221,7 +261,7 @@ void GameScene::loadScene()
     }
     
     
-    snake[0]->runAction(Sequence::create(Place::create(Vec2(snake[0]->getPosition().x+rMax,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
+    ball->runAction(Sequence::create(Place::create(Vec2(ball->getPosition().x+rMax,ball->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL)); // set ball position
     
     distance=rMax;
     // auto rotateBy = RotateBy::create(0.25f,360/distance);
@@ -338,7 +378,7 @@ bool GameScene::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
         }
             
         // CCLOG("Cor=%f,%f",snake[0]->getPosition().x,snake[0]->getPosition().y);
-        snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x-rIncrement,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+        ball->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(ball->getPosition().x-rIncrement,ball->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
         
     }
     
@@ -487,7 +527,7 @@ void GameScene::removeResources()
 
 //function updates every frame
 void GameScene::update(float dt){
- Point snakePosition1 = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+ Point snakePosition1 = rotationPoint->convertToWorldSpace(ball->getPosition());
     int clockwiseRotationValue = (360-(int)(clockwiseObstacleRotationPoint->getRotation()) % 360);
     int antiClockwiseRotationValue = (360-(int)(antiClockwiseObstacleRotationPoint->getRotation()) % 360);
     clockwiseRotationValue=clockwiseRotationValue==360?0:clockwiseRotationValue;
@@ -500,7 +540,7 @@ if(controlable==1){
    {              // CCLOG("Distance=%f",distance);
          if(obstacles[i].ringNum*rIncrement==distance || obstacles[i].ringNum*rIncrement+rIncrement==distance)
            {
-                      Point snakePosition = rotationPoint->convertToWorldSpace(snake[0]->getPosition());
+                      Point snakePosition = rotationPoint->convertToWorldSpace(ball->getPosition());
                if(ringSpin[obstacles[i].ringNum] == 1)
                    rotationValue=antiClockwiseRotationValue;
                else
@@ -536,7 +576,7 @@ if(controlable==1){
                          CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("audio/collision.mp3");
                          CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/collision.mp3");
                      }
-                     snake[0]->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(snake[0]->getPosition().x+diff,snake[0]->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
+                     ball->runAction(Sequence::create(MoveTo::create(ballTime*2,Vec2(ball->getPosition().x+diff,ball->getPosition().y)),CallFunc::create(CC_CALLBACK_0(GameScene::actionComplete,this)),NULL));
                            break;
                  }
            }
