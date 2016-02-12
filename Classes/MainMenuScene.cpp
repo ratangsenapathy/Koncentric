@@ -64,11 +64,14 @@ bool MainMenuScene::init()
     
     ParticleSystemQuad* m_emitter = new ParticleSystemQuad();
     m_emitter = ParticleFlower::create();
+   // m_emitter->setEmitterMode(cocos2d::ParticleSystem::Mode::RADIUS);
     m_emitter->setEmissionRate(20);
     m_emitter->setSpeed(150);
    // m_emitter->setColor(Color3B(50, 100, 200));
     m_emitter->setStartColor(Color4F(0, 180, 200, 255));
     m_emitter->setPosition(Vec2(visibleSize.width/2+origin.x,visibleSize.height*0.55+origin.y));
+//    m_emitter->setStartRadius(10);
+//    m_emitter->setEndRadius(50);
     //m_emitter->setGravity(Vec2(0,-90));
     // = kCCParticleModeGravity
     //m_emitter->modeA.gravity = ccp(0,-90);

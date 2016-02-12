@@ -26,6 +26,7 @@ public:
     cocos2d::DrawNode* pathNode;
     //cocos2d::DrawNode* ball;
     cocos2d::ParticleSystemQuad* ball;
+    //cocos2d::ParticleSystemQuad* pathNode;
     cocos2d::Node* rotationPoint;
     cocos2d::Node* clockwiseObstacleRotationPoint;
     cocos2d::Node* antiClockwiseObstacleRotationPoint;

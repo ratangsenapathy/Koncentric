@@ -186,14 +186,18 @@ void GameScene::loadScene()
     ball = DrawNode::create();
     ball->drawDot(Vec2(0,0),ballRadius,ballColor);
     */
-    ball = new ParticleSystemQuad();
+    ball = new ParticleSystemQuad(); 
     ball = ParticleMeteor::create();
-    ball->setEmissionRate(100);
-    ball->setSpeedVar(0);
-    
+    ball->setEmissionRate(50);
+    ball->setSpeed(50);
+    ball->setLife(1);
+    ball->setLifeVar(0.2);
     ball->setSpeed(50);
     ball->setStartColor(ballColor);
-    ball->setStartSize(1.3*M_PI*ballRadius);
+    //ball->setGravity(Vec2(0,-30));
+    //ball->setTangentialAccel(10);
+    ball->setStartSize(1.4*M_PI*ballRadius);
+   // ball->set
     ball->setStartSizeVar(0);
     ball->setPosition(Vec2(0,0));
     
@@ -212,6 +216,7 @@ void GameScene::loadScene()
             pathNode = DrawNode::create();
             pathNode->drawDot(Vec2(r*cos(theta)+origin.x+visibleSize.width/2,r*sin(theta)+origin.y+visibleSize.height/2),1,ringColor);
             //pathNode->autorelease();
+           
             this->addChild(pathNode,1);
             //this->removeChild(pathNode);
         }
@@ -248,6 +253,9 @@ void GameScene::loadScene()
         DrawNode* polygon = DrawNode::create();
         
         polygon->drawPolygon(vertices,index, obstacleColor, 1, obstacleColor);
+        
+        //BlendFunc f = {GL_TEXTURE1, GL_TEXTURE1};
+      //  polygon->setBlendFunc(f);
         if(ringSpin[obstacles[i].ringNum] == 1)
         antiClockwiseObstacleRotationPoint->addChild(polygon);
         else
