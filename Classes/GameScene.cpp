@@ -188,11 +188,11 @@ void GameScene::loadScene()
     */
     ball = new ParticleSystemQuad(); 
     ball = ParticleMeteor::create();
-    ball->setEmissionRate(50);
-    ball->setSpeed(50);
+   // ball->setEmissionRate(50);
+   // ball->setSpeed(50);
     ball->setLife(1);
     ball->setLifeVar(0.2);
-    ball->setSpeed(50);
+   // ball->setSpeed(50);
     ball->setStartColor(ballColor);
     //ball->setGravity(Vec2(0,-30));
     //ball->setTangentialAccel(10);
@@ -472,6 +472,7 @@ void GameScene::actionComplete()
             //auto scene = GameScene::createScene(levelNo);
             //auto scene = GameScene::createScene();
             //Director::getInstance()->replaceScene(scene);
+            removeResources();
             displayLevelCompleteLayer();
            
             return;
@@ -491,24 +492,37 @@ void GameScene::displayLevelCompleteLayer()
     layout->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
     layout->setOpacity(100);
     layout->setBackGroundColor(Color3B(50, 50, 50));
-     this->addChild(layout,4);
+    this->addChild(layout,4);
     
     auto congratsLabel = Label::createWithTTF("You cleared the level", "fonts/Marker Felt.ttf", 50);
-    congratsLabel->setColor(Color3B::GREEN);
+    congratsLabel->setColor(Color3B(ballColor));
     congratsLabel->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height*0.8));
     
+    ParticleSystemQuad* next = new ParticleSystemQuad();
+    next = ParticleMeteor::create();
+   // next->setEmissionRate(25);
+   // next->setSpeed(180);
+    next->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height/2));
+    next->cocos2d::Node::setRotation(-45);
+    next->setStartColor(ballColor);
+   // next->setGravity(const cocos2d::Vec2 &g)
+    //m_emitter->setLifeVar(0);
+
+    
     auto goToNextLevelItem = MenuItemFont::create("Next", CC_CALLBACK_1(GameScene::goToNextLevel,this));
-    goToNextLevelItem->setColor(Color3B(0, 0, 255));
-    goToNextLevelItem->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height/2));
+    goToNextLevelItem->setColor(Color3B(ballColor));
+    goToNextLevelItem->setPosition(Vec2(layout->getContentSize().width/2,layout->getContentSize().height*0.3));
     auto menu = Menu::create(goToNextLevelItem,NULL);
     menu->setPosition(Point::ZERO);
     layout->addChild(congratsLabel);
+    layout->addChild(next);
     layout->addChild(menu);
 }
 
 void GameScene::goToNextLevel(cocos2d::Ref *pSender)
-{
-    removeResources();
+{   layout->removeAllChildrenWithCleanup(true);
+    //removeResources();
+    this->removeAllChildrenWithCleanup(true);
     
     UserDefault::getInstance()->setIntegerForKey("LevelNo", ++levelNo);
     parseJSON();
@@ -517,7 +531,7 @@ void GameScene::goToNextLevel(cocos2d::Ref *pSender)
 
 void GameScene::removeResources()
 {
-    layout->removeAllChildrenWithCleanup(true);
+    //layout->removeAllChildrenWithCleanup(true);
     timer->unschedule(schedule_selector(GameScene::updateClock));
     this->unschedule(schedule_selector(GameScene::changeObstacleDirection));
     delete []obstacles;
