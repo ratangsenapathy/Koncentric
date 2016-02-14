@@ -3,6 +3,7 @@
 #include "OptionsScene.h"
 #include "Definitions.h"
 #include "SimpleAudioEngine.h"
+#include "BestTimeScene.h"
 
 USING_NS_CC;
 
@@ -62,6 +63,13 @@ bool MainMenuScene::init()
     optionItem->setPosition(Point(visibleSize.width/2+origin.x, visibleSize.height*0.6-playItem->getContentSize().height*2+origin.y));
     optionItem->setTag(1);
     
+    auto bestTimeItem = MenuItemFont::create("Best Times",CC_CALLBACK_1(MainMenuScene::goToGameScene,this));
+    
+    bestTimeItem->setColor(cocos2d::Color3B::BLUE);
+    bestTimeItem->setScale(2);
+    bestTimeItem->setPosition(Point(visibleSize.width/2+origin.x, visibleSize.height*0.6-playItem->getContentSize().height*2-optionItem->getContentSize().height*2+origin.y));
+    bestTimeItem->setTag(2);
+    
     ParticleSystemQuad* m_emitter = new ParticleSystemQuad();
     m_emitter = ParticleFlower::create();
    // m_emitter->setEmitterMode(cocos2d::ParticleSystem::Mode::RADIUS);
@@ -69,14 +77,14 @@ bool MainMenuScene::init()
     m_emitter->setSpeed(150);
    // m_emitter->setColor(Color3B(50, 100, 200));
     m_emitter->setStartColor(Color4F(0, 180, 200, 255));
-    m_emitter->setPosition(Vec2(visibleSize.width/2+origin.x,visibleSize.height*0.55+origin.y));
+    m_emitter->setPosition(Vec2(visibleSize.width/2+origin.x,visibleSize.height*0.53+origin.y));
 //    m_emitter->setStartRadius(10);
 //    m_emitter->setEndRadius(50);
     //m_emitter->setGravity(Vec2(0,-90));
     // = kCCParticleModeGravity
     //m_emitter->modeA.gravity = ccp(0,-90);
     
-    auto menu = Menu::create(playItem,optionItem,NULL);
+    auto menu = Menu::create(playItem,optionItem,bestTimeItem,NULL);
     menu->setPosition(Point::ZERO);
     this->addChild(m_emitter);
     this->addChild(gameTitle);
@@ -99,6 +107,7 @@ void MainMenuScene::goToGameScene(cocos2d::Ref *sender){
         Director::getInstance()->replaceScene(TransitionFade::create(TRANSITION_TIME, scene));
     }
     else
+    if(item->getTag()==1)
     {
        // this->removeAllChildrenWithCleanup(true);
        // Director::getInstance()->getTextureCache()->removeUnusedTextures();
@@ -107,6 +116,11 @@ void MainMenuScene::goToGameScene(cocos2d::Ref *sender){
         auto scene = OptionsScene::createScene();
         Director::getInstance()->pushScene(TransitionFade::create(TRANSITION_TIME, scene));
         
+    }
+    else
+    {
+        auto scene = BestTimeScene::createScene();
+        Director::getInstance()->pushScene(TransitionFade::create(TRANSITION_TIME, scene));
     }
     
 

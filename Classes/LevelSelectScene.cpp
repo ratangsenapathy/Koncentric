@@ -66,8 +66,7 @@ bool LevelSelectScene::init()
     auto containerSize = Size(scrollFrameSize.width, scrollFrameSize.height*NO_OF_SCROLL_PANES);
     scrollView->setInnerContainerSize(containerSize);
     //sroll view definition
-    
-    //Level select label
+        //Level select label
     auto levelSelectLabel = Label::createWithTTF("Select a Level","fonts/Marker Felt.ttf",36);
     levelSelectLabel->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*15/16));
     
