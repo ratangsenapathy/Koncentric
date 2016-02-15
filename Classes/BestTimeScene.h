@@ -36,6 +36,7 @@ private:
     void generatePackLevels(Ref *pSender);
     void displayBestTime();
     void swipeFinished();
+    void loadScene();
     
 };
 

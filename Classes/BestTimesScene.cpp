@@ -32,6 +32,17 @@ bool BestTimeScene::init()
         return false;
     }
     
+    
+    currentPackNumber=1;
+    
+    loadScene();
+    
+    //this->addChild((scrollView));
+        return true;
+}
+
+void BestTimeScene::loadScene()
+{
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
     
@@ -39,23 +50,23 @@ bool BestTimeScene::init()
     listener->onTouchEnded = CC_CALLBACK_2(BestTimeScene::onTouchEnded, this);
     
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
+    
     numberOfPacks =ceil(LEVEL_COUNT/LEVEL_PACK_LENGTH);
     displayBestTimeOn=false;
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     /*
-    
-    Size scrollFrameSize = Size(visibleSize.width, visibleSize.height);
-    auto scrollView = cocos2d::ui::ScrollView::create();
-    scrollView->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
-    scrollView->setBackGroundColor(Color3B(0, 0, 0));
-    scrollView->setSize(scrollFrameSize);
-    scrollView->setPosition(Point(origin.x,visibleSize.height*0.05));
-    scrollView->setDirection(cocos2d::ui::ScrollView::Direction::VERTICAL);
-    auto containerSize = Size(scrollFrameSize.width, scrollFrameSize.height*NO_OF_SCROLL_PANES_BEST_TIME);
-    scrollView->setInnerContainerSize(containerSize);
-    */
+     
+     Size scrollFrameSize = Size(visibleSize.width, visibleSize.height);
+     auto scrollView = cocos2d::ui::ScrollView::create();
+     scrollView->setBackGroundColorType(cocos2d::ui::Layout::BackGroundColorType::SOLID);
+     scrollView->setBackGroundColor(Color3B(0, 0, 0));
+     scrollView->setSize(scrollFrameSize);
+     scrollView->setPosition(Point(origin.x,visibleSize.height*0.05));
+     scrollView->setDirection(cocos2d::ui::ScrollView::Direction::VERTICAL);
+     auto containerSize = Size(scrollFrameSize.width, scrollFrameSize.height*NO_OF_SCROLL_PANES_BEST_TIME);
+     scrollView->setInnerContainerSize(containerSize);
+     */
     
     auto bestTimeTitle = Label::createWithTTF("Best Times", "fonts/Marker Felt.ttf", 80);
     bestTimeTitle->setPosition(Point(visibleSize.width/2+origin.x,visibleSize.height*0.90+origin.y));
@@ -73,72 +84,76 @@ bool BestTimeScene::init()
     auto menu = Menu::create(backItem,NULL);
     menu->setPosition(Point::ZERO);
     /*
-    auto levelSubTitle = Label::createWithTTF("Level", "fonts/Marker Felt.ttf", 50);
-    levelSubTitle->setPosition(Point(containerSize.width*0.15,containerSize.height*0.8));
-    levelSubTitle->setColor(Color3B(0,0, 255));
-    
-    auto timeSubTitle = Label::createWithTTF("Time", "fonts/Marker Felt.ttf", 50);
-    timeSubTitle->setPosition(Point(containerSize.width*0.85,containerSize.height*0.8));
-    timeSubTitle->setColor(Color3B(0,0, 255));
-   
-    for(int i=0;i<LEVEL_COUNT;i++)
-    {
-        char levelNo[4];
-        sprintf(levelNo,"%d",i+1);
-        auto levelNoLabel = Label::createWithTTF(levelNo, "fonts/Marker Felt.ttf", 50);
-        levelNoLabel->setPosition(Point(containerSize.width*0.15,containerSize.height*0.8-levelSubTitle->getContentSize().height*2*(i+1)));
-        levelNoLabel->setColor(Color3B(200,200, 200));
-        scrollView->addChild(levelNoLabel);
-        
-        char minKey[15],secKey[15];
-        char bestTimeText[15];
-        sprintf(minKey, "BestMinKey%d",i);
-        sprintf(secKey, "BestSecKey%d",i);
-        int bestMin = UserDefault::getInstance()->getIntegerForKey(minKey,-1);
-        int bestSec = UserDefault::getInstance()->getIntegerForKey(secKey,-1);
-        if(bestMin==-1 || bestSec==-1)
-        {
-            sprintf(bestTimeText, "NA");
-        }
-        else
-        {
-            sprintf(bestTimeText, "%s",getTimeText(bestMin, bestSec).c_str());
-        }
-        auto bestTimeLabel = Label::createWithTTF(bestTimeText,"fonts/Marker Felt.ttf",50);
-        bestTimeLabel->setPosition(Point(containerSize.width*0.85,containerSize.height*0.8-timeSubTitle->getContentSize().height*2*(i+1)));
-        bestTimeLabel->setColor(Color3B(200,200, 200));
-        scrollView->addChild(bestTimeLabel);
-
-    }
-    
-    scrollView->addChild(bestTimeTitle);
-    scrollView->addChild(levelSubTitle);
-    scrollView->addChild(timeSubTitle);
+     auto levelSubTitle = Label::createWithTTF("Level", "fonts/Marker Felt.ttf", 50);
+     levelSubTitle->setPosition(Point(containerSize.width*0.15,containerSize.height*0.8));
+     levelSubTitle->setColor(Color3B(0,0, 255));
+     
+     auto timeSubTitle = Label::createWithTTF("Time", "fonts/Marker Felt.ttf", 50);
+     timeSubTitle->setPosition(Point(containerSize.width*0.85,containerSize.height*0.8));
+     timeSubTitle->setColor(Color3B(0,0, 255));
+     
+     for(int i=0;i<LEVEL_COUNT;i++)
+     {
+     char levelNo[4];
+     sprintf(levelNo,"%d",i+1);
+     auto levelNoLabel = Label::createWithTTF(levelNo, "fonts/Marker Felt.ttf", 50);
+     levelNoLabel->setPosition(Point(containerSize.width*0.15,containerSize.height*0.8-levelSubTitle->getContentSize().height*2*(i+1)));
+     levelNoLabel->setColor(Color3B(200,200, 200));
+     scrollView->addChild(levelNoLabel);
+     
+     char minKey[15],secKey[15];
+     char bestTimeText[15];
+     sprintf(minKey, "BestMinKey%d",i);
+     sprintf(secKey, "BestSecKey%d",i);
+     int bestMin = UserDefault::getInstance()->getIntegerForKey(minKey,-1);
+     int bestSec = UserDefault::getInstance()->getIntegerForKey(secKey,-1);
+     if(bestMin==-1 || bestSec==-1)
+     {
+     sprintf(bestTimeText, "NA");
+     }
+     else
+     {
+     sprintf(bestTimeText, "%s",getTimeText(bestMin, bestSec).c_str());
+     }
+     auto bestTimeLabel = Label::createWithTTF(bestTimeText,"fonts/Marker Felt.ttf",50);
+     bestTimeLabel->setPosition(Point(containerSize.width*0.85,containerSize.height*0.8-timeSubTitle->getContentSize().height*2*(i+1)));
+     bestTimeLabel->setColor(Color3B(200,200, 200));
+     scrollView->addChild(bestTimeLabel);
+     
+     }
+     
+     scrollView->addChild(bestTimeTitle);
+     scrollView->addChild(levelSubTitle);
+     scrollView->addChild(timeSubTitle);
      
      */
     
-    currentPackNumber=1;
+    
     
     currentLayout = generateLevelPackLayer(currentPackNumber,0);
     this->addChild(bestTimeTitle);
     this->addChild(currentLayout);
     this->addChild(menu,2);
-    
-    //this->addChild((scrollView));
-        return true;
 }
 
 void BestTimeScene::goToMainMenuScene(cocos2d::Ref *sender){
     
     if(displayBestTimeOn)
     {
-        
+       //` _eventDispatcher->removeAllEventListeners();
+        currentLayout->removeAllChildrenWithCleanup(true);
+        this->removeAllChildrenWithCleanup(true);
+        loadScene();
     }
+    else
+    {
+        displayBestTimeOn=false;
     this->removeAllChildrenWithCleanup(true);
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
    
 
     Director::getInstance()->popScene();
+    }
 }
 
 
@@ -237,10 +252,12 @@ cocos2d::ui::Layout* BestTimeScene::generateLevelPackLayer(int packNo,int type)
 
     auto layout = cocos2d::ui::Layout::create();
     layout->setLayoutType(ui::Layout::Type::HORIZONTAL);
-    layout->setContentSize(Size(visibleSize.width*0.8,visibleSize.height/3));
-    layout->setPosition(Vec2(origin.x + visibleSize.width/2-layout->getContentSize().width/2+type*visibleSize.width, origin.y + visibleSize.height/2-layout->getContentSize().height/2));
+   // layout->setContentSize(Size(visibleSize.width*0.8,visibleSize.height/3));
+    layout->setContentSize(Size(visibleSize.width*0.6,visibleSize.width*0.6));
+    layout->setRotation(-45);
+    layout->setPosition(Vec2(origin.x + visibleSize.width*0.5+type*visibleSize.width, origin.y + visibleSize.height*0.45-layout->getContentSize().height/2));
     layout->setBackGroundColorType(ui::Layout::BackGroundColorType::SOLID);
-   layout->setOpacity(100);
+    layout->setOpacity(100);
     layout->setBackGroundColor(Color3B(50, 50, 50));
     
     
@@ -254,6 +271,7 @@ cocos2d::ui::Layout* BestTimeScene::generateLevelPackLayer(int packNo,int type)
     packItem->setPosition(layout->getContentSize().width/2,layout->getContentSize().height/2);
     auto menu = Menu::create(packItem,NULL);
     menu->setPosition(Point::ZERO);
+    packItem->setRotation(45);
     layout->addChild(menu);
     
     return layout;
@@ -265,8 +283,8 @@ void BestTimeScene::generatePackLevels(cocos2d::Ref *pSender)
 {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    auto resizeAction = ScaleTo::create(0.5, visibleSize.width, visibleSize.height);
-    auto moveAction = MoveTo::create(0.5,Vec2(Point::ZERO));
+    auto resizeAction = ScaleTo::create(0.5, visibleSize.width*1.5, visibleSize.height*1.5);
+    auto moveAction = MoveBy::create(0.5,Vec2(0,-visibleSize.height/2));
     auto spawnAction = Spawn::create(resizeAction,moveAction, NULL);
     currentLayout->runAction(Sequence::create(spawnAction,CallFunc::create(CC_CALLBACK_0(BestTimeScene::displayBestTime,this)) ,NULL));
     
@@ -275,7 +293,7 @@ void BestTimeScene::generatePackLevels(cocos2d::Ref *pSender)
 }
 
 void BestTimeScene::displayBestTime()
-{
+{   this->removeChild(currentLayout);
     displayBestTimeOn=true;
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
