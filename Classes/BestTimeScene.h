@@ -18,7 +18,6 @@ public:
     float touchEndedX;
     float touchEndedY;
     int numberOfPacks;
-    int currentPackNo;
     bool displayBestTimeOn;
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
@@ -30,6 +29,7 @@ private:
     bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event* event);
     void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event* event);
     void goToMainMenuScene(cocos2d::Ref *sender);
+    
     //void checkBoxSelectEvent(Ref* pSender,cocos2d::ui::CheckBox::EventType type);
     std::string getTimeText(int minCount,int secCount);
     cocos2d::ui::Layout* generateLevelPackLayer(int packNo,int type);

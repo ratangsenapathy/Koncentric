@@ -148,7 +148,9 @@ void BestTimeScene::goToMainMenuScene(cocos2d::Ref *sender){
     else
     {
         displayBestTimeOn=false;
-    this->removeAllChildrenWithCleanup(true);
+        this->removeAllChildrenWithCleanup(true);
+//        _eventDispatcher->removeAllEventListeners();
+
     Director::getInstance()->getTextureCache()->removeUnusedTextures();
    
 
@@ -261,7 +263,7 @@ cocos2d::ui::Layout* BestTimeScene::generateLevelPackLayer(int packNo,int type)
     layout->setBackGroundColor(Color3B(50, 50, 50));
     
     
-    currentPackNo=packNo;
+    currentPackNumber=packNo;
     char packNum[4];
     sprintf(packNum,"Pack %d",packNo);
     auto packItem = MenuItemFont::create(packNum,CC_CALLBACK_1(BestTimeScene::generatePackLevels,this));
@@ -305,7 +307,7 @@ void BestTimeScene::displayBestTime()
     timeSubTitle->setPosition(Point(visibleSize.width*0.85+origin.x,visibleSize.height*0.8+origin.y));
     timeSubTitle->setColor(Color3B(0,0, 255));
     int k=0;
-    int rangeBegin=(currentPackNo-1)*(int)LEVEL_PACK_LENGTH;
+    int rangeBegin=(currentPackNumber-1)*(int)LEVEL_PACK_LENGTH;
     int rangeEnd = rangeBegin+(int)LEVEL_PACK_LENGTH>LEVEL_COUNT?LEVEL_COUNT:rangeBegin+(int)LEVEL_PACK_LENGTH;
     for(int i=rangeBegin;i<rangeEnd;i++)
     {
